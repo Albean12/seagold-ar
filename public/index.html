@@ -63,37 +63,33 @@
              embedded color-space="sRGB" 
              renderer="colorManagement: true, physicallyCorrectLights"
              device-orientation-permission-ui="enabled: true">
-      <a-camera position="0 0 0"></a-camera>
+      <a-camera position="0 0 1"></a-camera> <!-- Camera now sees forward -->
 
       <a-entity id="anchor" mindar-image-target="targetIndex: 0">
         <!-- TEMP: Red Box for visual test -->
-        <a-box color="red" position="0 0 -0.4" depth="0.3" height="0.3" width="0.3"></a-box>
+        <a-box color="red" position="0.2 0 0.3" depth="0.2" height="0.2" width="0.2"></a-box>
 
         <!-- Card base -->
         <a-plane class="clickable"
-                 position="0 0 -0.5"
+                 position="0 0 0"
                  width="1"
                  height="0.5"
                  color="#00FFAA"
                  onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')">
           
           <!-- Dormitory Info -->
-          <a-entity class="dorm-info" position="-0.35 0.1 0.05" text="
-            value: Seagold Dormitory\nCOMFORT AWAY FROM HOME\n\n09225927385\nseagold.service@gmail.com;
-            width: 0.7;
-            align: left;">
-          </a-entity>
+          <a-entity class="dorm-info" position="-0.35 0.1 0.01" text="value: Seagold Dormitory\nCOMFORT AWAY FROM HOME\n\n09225927385\nseagold.service@gmail.com; width: 0.7; align: left;"></a-entity>
 
           <!-- Map Image -->
           <a-plane id="mapPlane"
-                   position="0.35 0.15 0.05"
+                   position="0.35 0.15 0.01"
                    width="0.5"
                    height="0.3"
                    color="#ddd"></a-plane>
 
           <!-- Website Button -->
           <a-text value="Visit Our Website"
-                  position="0 -0.2 0.05"
+                  position="0 -0.2 0.01"
                   align="center"
                   width="0.8"
                   color="#0066cc"
@@ -131,7 +127,6 @@
         log("❌ Target lost");
       });
 
-      // Geolocation and map rendering
       const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
       const dormPos = { lat: 14.603919, lng: 120.987760 };
 
