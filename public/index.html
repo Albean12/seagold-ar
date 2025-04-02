@@ -66,11 +66,11 @@
 
     <a-camera position="0 0 0"></a-camera>
 
-    <a-entity id="anchor" mindar-image-target="targetIndex: 0">
+    <a-entity id="anchor" mindar-image-target="targetIndex: 0" visible="true">
       <!-- Card Base with 3D Entrance Animation -->
-      <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
+      <a-plane class="clickable" position="0 0 -0.1" visible="true" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
-               animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
+               animation="property: position; to: 0 0.05 -0.1; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
         <!-- 3D Brand Title -->
@@ -110,8 +110,8 @@
                 width="1"
                 color="#333"></a-text>
 
-        <!-- Dynamic Map (already in your logic) -->
-        <a-plane id="mapPlane" position="0.35 -0.25 0.01" width="0.5" height="0.3" color="#ddd"
+        <!-- Dynamic Map -->
+        <a-plane id="mapPlane" visible="true" position="0.35 -0.25 0.01" width="0.5" height="0.3" color="#ddd"
                  material="shader: flat"
                  animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true"></a-plane>
 
@@ -189,10 +189,13 @@
     }
 
     function setMapTexture(url) {
-      if (mapPlane) {
-        mapPlane.setAttribute("material", "src", url);
-        debugLog(`Map texture set with URL: ${url}`);
-      }
+      setTimeout(() => {
+        if (mapPlane) {
+          mapPlane.setAttribute("visible", "true");
+          mapPlane.setAttribute("material", "shader: flat; src: " + url);
+          debugLog(`Map texture set with URL: ${url}`);
+        }
+      }, 500); // delay to ensure element is rendered
     }
 
     debugLog("Attempting to get geolocation...");
