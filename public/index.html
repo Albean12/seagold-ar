@@ -40,6 +40,22 @@
         border-radius: 8px;
         pointer-events: none;
       }
+      
+      /* Debug console */
+      #debug-console {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 10000;
+      }
     </style>
   </head>
   <body>
@@ -83,24 +99,71 @@
       </a-entity>
     </a-scene>
 
+    <div id="debug-console"></div>
+
     <script>
+      const debugConsole = document.getElementById('debug-console');
+      function debugLog(message) {
+        const entry = document.createElement('div');
+        entry.textContent = `[DEBUG] ${new Date().toLocaleTimeString()}: ${message}`;
+        debugConsole.appendChild(entry);
+        debugConsole.scrollTop = debugConsole.scrollHeight;
+        console.log(message);
+      }
+
+      debugLog("Initializing AR application...");
+      
       const mapPlane = document.getElementById("mapPlane");
+      if (!mapPlane) debugLog("❌ Error: Could not find mapPlane element");
 
       // Enhanced scan instruction
-      document.querySelector('.mindar-ui-overlay .scanning')?.insertAdjacentHTML(
-        'beforeend',
-        '<div style="margin-top: 12px; color: white; text-align: center;">Hold steady 30cm from card</div>'
-      );
+      const scanningElement = document.querySelector('.mindar-ui-overlay .scanning');
+      if (scanningElement) {
+        scanningElement.insertAdjacentHTML(
+          'beforeend',
+          '<div style="margin-top: 12px; color: white; text-align: center;">Hold steady 30cm from card</div>'
+        );
+        debugLog("Added scanning instructions to UI");
+      } else {
+        debugLog("❌ Could not find scanning UI element");
+      }
 
       // Camera quality monitor
-      document.querySelector('a-scene').addEventListener('arReady', () => {
-        const video = document.querySelector('video.mindar-image-video');
-        if (video) {
-          video.addEventListener('play', () => {
-            video.style.filter = 'contrast(1.3) saturate(1.3)';
-          });
-        }
-      });
+      const scene = document.querySelector('a-scene');
+      if (scene) {
+        scene.addEventListener('arReady', () => {
+          debugLog("AR system is ready");
+          const video = document.querySelector('video.mindar-image-video');
+          if (video) {
+            video.addEventListener('play', () => {
+              video.style.filter = 'contrast(1.3) saturate(1.3)';
+              debugLog("Video stream started, applied filters");
+            });
+          } else {
+            debugLog("❌ Could not find AR video element");
+          }
+        });
+        
+        scene.addEventListener('renderstart', () => {
+          debugLog("A-Frame rendering started");
+        });
+      } else {
+        debugLog("❌ Could not find a-scene element");
+      }
+
+      // Target detection events
+      const anchor = document.querySelector('#anchor');
+      if (anchor) {
+        anchor.addEventListener('targetFound', () => {
+          debugLog("✅ Image target detected - content should be visible");
+        });
+        
+        anchor.addEventListener('targetLost', () => {
+          debugLog("❌ Image target lost - content hidden");
+        });
+      } else {
+        debugLog("❌ Could not find anchor element");
+      }
 
       const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
       const dormPos = { lat: 14.603919, lng: 120.987760 };
@@ -110,27 +173,55 @@
       }
 
       function setMapTexture(url) {
-        mapPlane.setAttribute("material", "src", url);
+        if (mapPlane) {
+          mapPlane.setAttribute("material", "src", url);
+          debugLog(`Map texture set with URL: ${url}`);
+        } else {
+          debugLog("❌ Cannot set map texture - mapPlane not found");
+        }
       }
 
+      debugLog("Attempting to get geolocation...");
       navigator.geolocation.getCurrentPosition((position) => {
         const userPos = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
         const mapUrl = createSimpleMapUrl(userPos);
-
-        // 🔍 Debug: log user location and map URL
-        console.log("📍 User position:", userPos, "🗺️ Map URL:", mapUrl);
-
+        
+        debugLog(`📍 User position: ${JSON.stringify(userPos)}`);
+        debugLog(`🗺️ Generated map URL: ${mapUrl}`);
+        
         setMapTexture(mapUrl);
       }, (err) => {
-        console.error("❌ Geolocation error:", err);
+        debugLog(`❌ Geolocation error: ${err.message}`);
+        // Fallback map
+        const fallbackUrl = "https://maps.googleapis.com/maps/api/staticmap?center=14.603919,120.987760&zoom=15&size=400x300&markers=color:red%7C14.603919,120.987760";
+        setMapTexture(fallbackUrl);
+        debugLog("Using fallback map image");
+      }, {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
       });
 
-      // 🔍 Debug: when image target is detected
-      document.querySelector('#anchor').addEventListener('targetFound', () => {
-        console.log("✅ Image target detected!");
+      // Check if all assets are loaded
+      window.addEventListener('load', () => {
+        debugLog("Page fully loaded");
+        
+        // Check if MindAR is properly initialized
+        if (window.MINDAR) {
+          debugLog("MindAR library loaded successfully");
+        } else {
+          debugLog("❌ MindAR library not loaded");
+        }
+        
+        // Check if A-Frame is properly initialized
+        if (window.AFRAME) {
+          debugLog("A-Frame library loaded successfully");
+        } else {
+          debugLog("❌ A-Frame library not loaded");
+        }
       });
     </script>
   </body>
