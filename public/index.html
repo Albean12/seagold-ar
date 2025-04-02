@@ -20,14 +20,14 @@
         color: #333;
         line-height: 1.2;
       }
-      
+
       /* MindAR Video Fix */
       body > video.mindar-image-video {
         filter: contrast(1.2) saturate(1.1) !important;
         -webkit-filter: contrast(1.2) saturate(1.1) !important;
         image-rendering: crisp-edges !important;
       }
-      
+
       /* Scanning Guide */
       .mindar-ui-overlay .scanning::after {
         content: "";
@@ -49,27 +49,28 @@
                           wasmPath: ./assets/mindar/;
                           filterMinCF: 0.01;
                           filterBeta: 0.001;"
-             embedded color-space="sRGB" 
+             embedded 
+             color-space="sRGB" 
              renderer="colorManagement: true, physicallyCorrectLights"
              device-orientation-permission-ui="enabled: true">
+
       <a-camera position="0 0 0"></a-camera>
 
       <a-entity id="anchor" mindar-image-target="targetIndex: 0">
         <!-- Card base with website link -->
         <a-plane class="clickable" position="0 0 0" width="1" height="0.5" color="#00FFAA"
                 onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')">
-          
+
           <!-- Dormitory Information -->
           <a-entity class="dorm-info" position="-0.35 0.1 0.01" text="
             value: Seagold Dormitory\nCOMFORT AWAY FROM HOME\n\n09225927385\nseagold.service@gmail.com;
             width: 0.7;
-            align: left;
-            ">
+            align: left;">
           </a-entity>
-          
+
           <!-- Map image that sticks to card -->
           <a-plane id="mapPlane" position="0.35 0.15 0.01" width="0.5" height="0.3" color="#ddd"></a-plane>
-          
+
           <!-- Website CTA -->
           <a-text value="Visit Our Website" 
                  position="0 -0.2 0.01" 
@@ -118,9 +119,18 @@
           lng: position.coords.longitude
         };
         const mapUrl = createSimpleMapUrl(userPos);
+
+        // 🔍 Debug: log user location and map URL
+        console.log("📍 User position:", userPos, "🗺️ Map URL:", mapUrl);
+
         setMapTexture(mapUrl);
       }, (err) => {
-        console.error("Geolocation error:", err);
+        console.error("❌ Geolocation error:", err);
+      });
+
+      // 🔍 Debug: when image target is detected
+      document.querySelector('#anchor').addEventListener('targetFound', () => {
+        console.log("✅ Image target detected!");
       });
     </script>
   </body>
