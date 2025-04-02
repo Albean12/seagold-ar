@@ -63,11 +63,16 @@
              embedded color-space="sRGB" 
              renderer="colorManagement: true, physicallyCorrectLights"
              device-orientation-permission-ui="enabled: true">
-      <a-camera position="0 0 1"></a-camera> <!-- Camera now sees forward -->
+      <a-camera position="0 0 1"></a-camera> <!-- Camera sees forward -->
 
       <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-        <!-- TEMP: Red Box for visual test -->
-        <a-box color="red" position="0.2 0 0.3" depth="0.2" height="0.2" width="0.2"></a-box>
+        <!-- 3D Duck Model (test) -->
+        <a-gltf-model 
+          src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb"
+          position="0 0 0.4"
+          scale="0.01 0.01 0.01"
+          rotation="0 180 0">
+        </a-gltf-model>
 
         <!-- Card base -->
         <a-plane class="clickable"
