@@ -8,7 +8,7 @@
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* SCENE LAYERING */
+    /* ==================== SCENE LAYERING ==================== */
     a-scene {
       position: fixed;
       width: 100%;
@@ -16,7 +16,7 @@
       z-index: 1;
     }
     
-    /* VIDEO FEED */
+    /* ==================== VIDEO FEED ==================== */
     body > video.mindar-image-video {
       z-index: 0;
       transform: none;
@@ -25,7 +25,7 @@
       image-rendering: crisp-edges;
     }
     
-    /* INTERACTIVE ELEMENTS */
+    /* ==================== INTERACTIVE ELEMENTS ==================== */
     .clickable {
       cursor: pointer;
       transition: all 0.3s ease;
@@ -34,7 +34,19 @@
       opacity: 0.8;
     }
     
-    /* DEBUG CONSOLE */
+    /* ==================== LINK STYLES ==================== */
+    .url-link {
+      color: #0066cc;
+      text-decoration: underline;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .url-link:hover {
+      color: #004499;
+      text-decoration: none;
+    }
+    
+    /* ==================== DEBUG CONSOLE ==================== */
     #debug-console {
       position: fixed;
       bottom: 0;
@@ -50,7 +62,7 @@
       z-index: 10000;
     }
     
-    /* SCANNING UI */
+    /* ==================== SCANNING UI ==================== */
     .mindar-ui-overlay .scanning::after {
       content: "";
       position: absolute;
@@ -62,10 +74,47 @@
       border-radius: 8px;
       pointer-events: none;
     }
+
+    /* ==================== MAP SLIDE ANIMATION ==================== */
+    .map-container {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 0.6rem;
+      height: 0.4rem;
+      transform: translateX(0.6rem);
+      opacity: 0;
+      transition: all 0.5s ease-out;
+      pointer-events: none;
+    }
+
+    .map-container.visible {
+      transform: translateX(0.7rem);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .map-toggle {
+      position: absolute;
+      right: 0.05rem;
+      bottom: 0.05rem;
+      width: 0.08rem;
+      height: 0.08rem;
+      background: #4a954e;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 5;
+    }
+
+    .map-toggle:hover {
+      transform: scale(1.2);
+      background: #3a853e;
+    }
   </style>
 </head>
 <body>
-  <!-- AR SCENE CONTAINER -->
+  <!-- ==================== AR SCENE CONTAINER ==================== -->
   <a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; 
                         autoStart: true; 
                         uiScanning: true; 
@@ -79,15 +128,15 @@
 
     <a-camera position="0 0 0"></a-camera>
 
-    <!-- TARGET ANCHOR POINT -->
+    <!-- ==================== TARGET ANCHOR POINT ==================== -->
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- BUSINESS CARD -->
+      <!-- ==================== BUSINESS CARD ==================== -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
-        <!-- CARD CONTENT -->
+        <!-- ==================== CARD CONTENT ==================== -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
@@ -117,17 +166,27 @@
                 width="1"
                 color="#333"></a-text>
 
+        <!-- ==================== CLICKABLE WEB URL ==================== -->
         <a-text value="🌐 Seagold Dormitory (Facebook)"
                 position="-0.42 -0.08 0.02"
                 width="1"
-                color="#333"></a-text>
+                color="#0066cc"
+                class="url-link"
+                onclick="window.open('https://facebook.com/seagolddormitory', '_blank')"></a-text>
 
-        <!-- INTERACTIVE MAP -->
-        <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
-                 material="shader: flat"
-                 animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true"></a-plane>
+        <!-- ==================== MAP TOGGLE BUTTON ==================== -->
+        <a-entity class="map-toggle" 
+                 position="0.45 -0.35 0.02"
+                 onclick="toggleMap()"></a-entity>
 
-        <!-- CALL TO ACTION -->
+        <!-- ==================== SLIDING MAP CONTAINER ==================== -->
+        <a-entity class="map-container" position="0.35 -0.2 0.02">
+          <a-plane id="mapPlane" width="0.55" height="0.35" color="#ddd" material="shader: flat"></a-plane>
+          <!-- You can add your image here later -->
+          <!-- <a-image src="./assets/images/map-overlay.png" width="0.55" height="0.35"></a-image> -->
+        </a-entity>
+
+        <!-- ==================== CALL TO ACTION ==================== -->
         <a-text value="Visit Our Website"
                 position="0 -0.42 0.02"
                 align="center"
@@ -140,11 +199,11 @@
     </a-entity>
   </a-scene>
 
-  <!-- DEBUG CONSOLE -->
+  <!-- ==================== DEBUG CONSOLE ==================== -->
   <div id="debug-console"></div>
 
   <script>
-    // DEBUG SYSTEM
+    // ==================== DEBUG SYSTEM ====================
     const debugConsole = document.getElementById('debug-console');
     function debugLog(message) {
       const entry = document.createElement('div');
@@ -154,7 +213,20 @@
       console.log(message);
     }
 
-    // VISIBILITY MANAGEMENT
+    // ==================== MAP TOGGLE FUNCTION ====================
+    function toggleMap() {
+      const mapContainer = document.querySelector('.map-container');
+      mapContainer.classList.toggle('visible');
+      
+      if (mapContainer.classList.contains('visible')) {
+        debugLog("Map sliding out");
+        loadMapTexture();
+      } else {
+        debugLog("Map sliding back");
+      }
+    }
+
+    // ==================== VISIBILITY MANAGEMENT ====================
     const anchor = document.querySelector('#anchor');
     let visibilityGuardActive = false;
     let visibilityGuardInterval;
@@ -196,7 +268,7 @@
       anchor.addEventListener('targetLost', cleanup, { once: true });
     }
 
-    // AR SYSTEM INITIALIZATION
+    // ==================== AR SYSTEM INITIALIZATION ====================
     const scene = document.querySelector('a-scene');
     if (scene) {
       scene.addEventListener('arReady', () => {
@@ -219,7 +291,7 @@
       });
     }
 
-    // MAP SYSTEM
+    // ==================== MAP SYSTEM ====================
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
@@ -234,24 +306,39 @@
       }
     }
 
-    function loadMapTexture(url) {
+    function loadMapTexture() {
       const mapPlane = document.getElementById("mapPlane");
       if (!mapPlane) return;
 
-      const img = new Image();
-      img.onload = function() {
-        mapPlane.setAttribute("material", "shader: flat; src: " + url);
-        debugLog(`🗺️ Map loaded: ${url}`);
-      };
-      img.onerror = function() {
-        mapPlane.setAttribute("color", "#4a954e");
-        mapPlane.removeAttribute("material");
-        debugLog("⚠️ Using fallback map color");
-      };
-      img.src = url;
+      // Only load if not already loaded
+      if (mapPlane.hasAttribute('material') && mapPlane.getAttribute('material').src) {
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userPos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          const mapUrl = createMapUrl(userPos);
+          
+          const img = new Image();
+          img.onload = function() {
+            mapPlane.setAttribute("material", "shader: flat; src: " + mapUrl);
+            debugLog(`🗺️ Map loaded: ${mapUrl}`);
+          };
+          img.src = mapUrl;
+        },
+        (error) => {
+          debugLog("Geolocation error, using default map");
+          const defaultUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}`;
+          mapPlane.setAttribute("material", "shader: flat; src: " + defaultUrl);
+        }
+      );
     }
 
-    // GEOLOCATION
+    // ==================== GEOLOCATION ====================
     debugLog("Initializing geolocation...");
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -261,20 +348,17 @@
             lng: position.coords.longitude
           };
           debugLog(`📍 Location: ${userPos.lat}, ${userPos.lng}`);
-          loadMapTexture(createMapUrl(userPos));
         },
         (err) => {
           debugLog(`❌ Geolocation error: ${err.message}`);
-          loadMapTexture(createMapUrl(dormPos));
         },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
       debugLog("❌ Geolocation unavailable");
-      loadMapTexture(createMapUrl(dormPos));
     }
 
-    // STARTUP
+    // ==================== STARTUP ====================
     window.addEventListener('load', () => {
       debugLog("System ready");
       if (!window.AFRAME) debugLog("❌ A-Frame missing");
