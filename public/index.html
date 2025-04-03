@@ -41,12 +41,45 @@
 
     /* ==================== MAP ANIMATION FIXES ==================== */
     .map-container {
-      transform: translateX(0.6rem) !important;
-      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+      position: absolute;
+      right: -0.7rem; /* Start hidden */
+      top: -0.2rem;
+      width: 0.6rem;
+      height: 0.4rem;
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      pointer-events: none;
+      z-index: 10;
     }
     
     .map-container.visible {
-      transform: translateX(0.7rem) !important;
+      right: 0.35rem; /* Slide in position */
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #mapPlane {
+      width: 0.55rem;
+      height: 0.35rem;
+      background-color: #ddd;
+    }
+
+    .map-toggle {
+      position: absolute;
+      right: 0.45rem;
+      bottom: -0.35rem;
+      width: 0.08rem;
+      height: 0.08rem;
+      background: #4a954e;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 15;
+    }
+
+    .map-toggle:hover {
+      transform: scale(1.2);
+      background: #3a853e;
     }
   </style>
 </head>
@@ -68,8 +101,7 @@
     <!-- ==================== TARGET ANCHOR POINT ==================== -->
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
       <!-- ==================== BUSINESS CARD ==================== -->
-      <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
-               onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
+      <a-plane position="0 0 0" width="1" height="0.9" color="#f2ede3"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
@@ -103,7 +135,6 @@
                 width="1"
                 color="#333"></a-text>
 
-        <!-- ==================== CLICKABLE WEB URL ==================== -->
         <a-text class="contact-text url-link" value="🌐 Seagold Dormitory (Facebook)"
                 position="-0.42 -0.08 0.02"
                 width="1"
@@ -111,13 +142,12 @@
                 onclick="window.open('https://facebook.com/seagolddormitory', '_blank')"></a-text>
 
         <!-- ==================== MAP TOGGLE BUTTON ==================== -->
-        <a-entity class="map-toggle" 
-                 position="0.45 -0.35 0.02"
+        <a-entity class="map-toggle clickable" 
                  onclick="toggleMap()"></a-entity>
 
         <!-- ==================== SLIDING MAP CONTAINER ==================== -->
-        <a-entity class="map-container" position="0.35 -0.2 0.02">
-          <a-plane id="mapPlane" width="0.55" height="0.35" color="#ddd" material="shader: flat"></a-plane>
+        <a-entity class="map-container">
+          <a-plane id="mapPlane" material="shader: flat"></a-plane>
         </a-entity>
 
         <!-- ==================== CALL TO ACTION ==================== -->
@@ -135,7 +165,6 @@
   <!-- ==================== DEBUG CONSOLE ==================== -->
   <div id="debug-console"></div>
 
-  <!-- Keep all your existing JavaScript exactly as is -->
   <script>
     // ==================== DEBUG SYSTEM ====================
     const debugConsole = document.getElementById('debug-console');
@@ -160,85 +189,9 @@
       }
     }
 
-    // ==================== VISIBILITY MANAGEMENT ====================
-    const anchor = document.querySelector('#anchor');
-    let visibilityGuardActive = false;
-    let visibilityGuardInterval;
-
-    function activateVisibilityGuard() {
-      if (!anchor || visibilityGuardActive) return;
-      
-      visibilityGuardActive = true;
-      debugLog("🛡️ Activating visibility guard");
-      
-      // Primary visibility enforcement
-      anchor.setAttribute('visible', 'true');
-      
-      // Backup visibility method
-      const backup = document.createElement('a-entity');
-      backup.setAttribute('geometry', 'primitive: plane; width: 0.01; height: 0.01');
-      backup.setAttribute('material', 'color: transparent; transparent: true; opacity: 0');
-      backup.setAttribute('visible', 'true');
-      anchor.appendChild(backup);
-      
-      // Continuous monitoring
-      visibilityGuardInterval = setInterval(() => {
-        if (anchor.getAttribute('visible') !== 'true') {
-          debugLog("🛡️ Correcting visibility loss");
-          anchor.setAttribute('visible', 'true');
-          backup.setAttribute('visible', 'true');
-        }
-      }, 100);
-      
-      // Cleanup handler
-      const cleanup = () => {
-        clearInterval(visibilityGuardInterval);
-        anchor.removeChild(backup);
-        visibilityGuardActive = false;
-        debugLog("🛡️ Visibility guard deactivated");
-        anchor.removeEventListener('targetLost', cleanup);
-      };
-      
-      anchor.addEventListener('targetLost', cleanup, { once: true });
-    }
-
-    // ==================== AR SYSTEM INITIALIZATION ====================
-    const scene = document.querySelector('a-scene');
-    if (scene) {
-      scene.addEventListener('arReady', () => {
-        debugLog("AR system initialized");
-        
-        if (anchor) {
-          anchor.addEventListener('targetFound', () => {
-            debugLog("🎯 Target detected");
-            activateVisibilityGuard();
-            
-            // Post-render visibility verification
-            requestAnimationFrame(() => {
-              if (anchor.getAttribute('visible') !== 'true') {
-                debugLog("🔄 Visibility verification");
-                anchor.setAttribute('visible', 'true');
-              }
-            });
-          });
-        }
-      });
-    }
-
     // ==================== MAP SYSTEM ====================
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
-
-    function createMapUrl(userPos) {
-      const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=17&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
-      
-      try {
-        return `http://localhost:3001/api/staticmap?userLat=${userPos.lat}&userLng=${userPos.lng}` || fallbackUrl;
-      } catch (e) {
-        debugLog(`Map error: ${e.message}`);
-        return fallbackUrl;
-      }
-    }
 
     function loadMapTexture() {
       const mapPlane = document.getElementById("mapPlane");
@@ -255,12 +208,19 @@
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          const mapUrl = createMapUrl(userPos);
+          const zoom = 15;
+          const size = "400x300";
+          const marker = `color:red%7C${dormPos.lat},${dormPos.lng}`;
+          const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=${zoom}&size=${size}&markers=${marker}&key=${GOOGLE_API_KEY}`;
           
           const img = new Image();
           img.onload = function() {
             mapPlane.setAttribute("material", "shader: flat; src: " + mapUrl);
-            debugLog(`🗺️ Map loaded: ${mapUrl}`);
+            debugLog("🗺️ Map loaded successfully");
+          };
+          img.onerror = function() {
+            debugLog("⚠️ Failed to load map image");
+            mapPlane.setAttribute("color", "#4a954e");
           };
           img.src = mapUrl;
         },
@@ -272,31 +232,10 @@
       );
     }
 
-    // ==================== GEOLOCATION ====================
-    debugLog("Initializing geolocation...");
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userPos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          debugLog(`📍 Location: ${userPos.lat}, ${userPos.lng}`);
-        },
-        (err) => {
-          debugLog(`❌ Geolocation error: ${err.message}`);
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    } else {
-      debugLog("❌ Geolocation unavailable");
-    }
-
-    // ==================== STARTUP ====================
+    // ==================== INITIALIZATION ====================
     window.addEventListener('load', () => {
       debugLog("System ready");
-      if (!window.AFRAME) debugLog("❌ A-Frame missing");
-      if (!window.MINDAR) debugLog("❌ MindAR missing");
+      // Initialize any required components
     });
   </script>
 </body>
