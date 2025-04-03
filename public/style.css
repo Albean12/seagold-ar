@@ -1,13 +1,14 @@
-/* BASE STYLES */
+/* ==================== BASE STYLES ==================== */
 body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   width: 100vw;
   height: 100vh;
+  touch-action: none; /* Prevent touch conflicts */
 }
 
-/* VIDEO FEED LAYER */
+/* ==================== VIDEO FEED LAYER ==================== */
 body > video.mindar-image-video {
   position: fixed !important;
   top: 0 !important;
@@ -17,8 +18,6 @@ body > video.mindar-image-video {
   object-fit: cover !important;
   z-index: 0 !important;
   pointer-events: none !important;
-  
-  /* Visual enhancements */
   filter: 
     contrast(1.2) 
     saturate(1.1) 
@@ -29,9 +28,10 @@ body > video.mindar-image-video {
     brightness(0.9) !important;
   image-rendering: crisp-edges;
   transform: none !important;
+  backface-visibility: hidden; /* Prevent rendering artifacts */
 }
 
-/* AR CONTENT LAYER */
+/* ==================== AR CONTENT LAYER ==================== */
 a-scene {
   position: fixed;
   top: 0;
@@ -41,11 +41,12 @@ a-scene {
   z-index: 1;
   pointer-events: auto;
   overflow: hidden;
+  will-change: transform; /* Optimize animations */
 }
 
-/* SCANNING UI ENHANCEMENTS */
+/* ==================== SCANNING UI ==================== */
 .mindar-ui-overlay {
-  pointer-events: none;
+  pointer-events: none !important; /* Ensure no interference */
 }
 
 .mindar-ui-overlay::before {
@@ -59,44 +60,16 @@ a-scene {
   border-radius: 12px;
   animation: scanPulse 2.5s infinite ease-in-out;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  pointer-events: none !important;
 }
 
-@keyframes scanPulse {
-  0%, 100% { 
-    opacity: 0.6;
-    transform: scale(0.95);
-  }
-  50% { 
-    opacity: 0.9;
-    transform: scale(1.05);
-  }
-}
-
-.mindar-ui-overlay::after {
-  content: "Align marker within frame";
-  position: absolute;
-  bottom: 22%;
-  left: 0;
-  right: 0;
-  color: white;
-  text-align: center;
-  font-size: 1.1em;
-  font-weight: 500;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  animation: textFade 3.5s infinite;
-}
-
-@keyframes textFade {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-/* INTERACTIVE ELEMENTS */
+/* ==================== INTERACTIVE ELEMENTS ==================== */
 .clickable {
   cursor: pointer;
   transition: 
     opacity 0.25s ease,
     transform 0.25s ease;
+  pointer-events: auto !important; /* Force clickable */
 }
 
 .clickable:hover {
@@ -104,16 +77,52 @@ a-scene {
   transform: scale(1.02);
 }
 
-/* MAP VISUALIZATION */
+/* ==================== MAP SYSTEM ==================== */
+.map-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 0.6rem;
+  height: 0.4rem;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 10;
+  will-change: transform, opacity;
+}
+
+.map-container.visible {
+  transform: translateX(110%);
+  opacity: 1;
+  pointer-events: auto;
+}
+
 #mapPlane {
-  transition: transform 0.5s ease-out;
+  transition: all 0.3s ease-out;
+  transform-origin: center;
+  will-change: transform;
 }
 
 #mapPlane:hover {
   transform: scale(1.03) rotateZ(1deg);
 }
 
-/* DEBUG CONSOLE */
+.map-toggle {
+  position: absolute;
+  right: 0.05rem;
+  bottom: 0.05rem;
+  width: 0.08rem;
+  height: 0.08rem;
+  background: #4a954e;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 15;
+  pointer-events: auto !important;
+}
+
+/* ==================== DEBUG CONSOLE ==================== */
 #debug-console {
   position: fixed;
   bottom: 0;
@@ -129,21 +138,49 @@ a-scene {
   overflow-y: auto;
   z-index: 10000;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none; /* Don't block AR interactions */
 }
 
-/* ANIMATION PRESETS */
+/* ==================== ANIMATIONS ==================== */
+@keyframes scanPulse {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes textFade {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
 @keyframes gentlePulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.03); opacity: 0.9; }
 }
 
-@keyframes subtleFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-/* SAFETY OVERRIDES */
+/* ==================== SAFETY OVERRIDES ==================== */
+[visible="false"],
 .a-entity[visible="false"] {
   visibility: visible !important;
   opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Prevent MindAR from hiding our elements */
+.mindar-image-target[visible="false"] {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ==================== TOUCH OPTIMIZATIONS ==================== */
+@media (pointer: coarse) {
+  .clickable {
+    min-width: 48px;
+    min-height: 48px;
+  }
 }
