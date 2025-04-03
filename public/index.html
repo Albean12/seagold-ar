@@ -66,16 +66,16 @@
 
     <a-camera position="0 0 0"></a-camera>
 
-    <a-entity id="anchor" mindar-image-target="targetIndex: 0" visible="true">
+    <a-entity id="anchor" mindar-image-target="targetIndex: 0">
       <!-- Card Base with 3D Entrance Animation -->
-      <a-plane class="clickable" position="0 0 -0.1" visible="true" width="1" height="0.9" color="#f2ede3"
+      <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
-               animation="property: position; to: 0 0.05 -0.1; dur: 800; easing: easeOutElastic"
+               animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
         <!-- 3D Brand Title -->
         <a-text value="Seagold Dormitory"
-                position="0 0.35 0.01" 
+                position="0 0.35 0.02" 
                 align="center" 
                 width="1.2" 
                 color="#4a954e" 
@@ -84,40 +84,40 @@
 
         <!-- Slogan -->
         <a-text value="Comfort Away From Home"
-                position="0 0.28 0.01"
+                position="0 0.28 0.02"
                 align="center"
                 width="1"
                 color="#d2a647"></a-text>
 
         <!-- Contact Info -->
         <a-text value="📞 09225927385"
-                position="-0.42 0.16 0.01"
+                position="-0.42 0.16 0.02"
                 width="1"
                 color="#333"></a-text>
 
         <a-text value="📧 seagold.service@gmail.com"
-                position="-0.42 0.08 0.01"
+                position="-0.42 0.08 0.02"
                 width="1"
                 color="#333"></a-text>
 
         <a-text value="📍 3/F Fern Bldg, Sampaloc, Manila"
-                position="-0.42 0.00 0.01"
+                position="-0.42 0.00 0.02"
                 width="1"
                 color="#333"></a-text>
 
         <a-text value="🌐 Seagold Dormitory (Facebook)"
-                position="-0.42 -0.08 0.01"
+                position="-0.42 -0.08 0.02"
                 width="1"
                 color="#333"></a-text>
 
         <!-- Dynamic Map -->
-        <a-plane id="mapPlane" visible="true" position="0.35 -0.25 0.01" width="0.5" height="0.3" color="#ddd"
+        <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
                  material="shader: flat"
                  animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true"></a-plane>
 
         <!-- Website CTA -->
         <a-text value="Visit Our Website"
-                position="0 -0.42 0.01"
+                position="0 -0.42 0.02"
                 align="center"
                 width="0.8"
                 color="#00bf63"
@@ -131,6 +131,7 @@
   <div id="debug-console"></div>
 
   <script>
+    // Enhanced debug system
     const debugConsole = document.getElementById('debug-console');
     function debugLog(message) {
       const entry = document.createElement('div');
@@ -140,11 +141,34 @@
       console.log(message);
     }
 
+    // System readiness checks
+    function checkSystemReadiness() {
+      if (!window.AFRAME) {
+        debugLog("❌ Critical Error: A-Frame not loaded");
+        return false;
+      }
+      if (!window.MINDAR) {
+        debugLog("❌ Critical Error: MindAR not loaded");
+        return false;
+      }
+      return true;
+    }
+
     debugLog("Initializing AR application...");
+    if (!checkSystemReadiness()) {
+      debugLog("Application cannot start due to missing dependencies");
+    }
 
+    // DOM element references
     const mapPlane = document.getElementById("mapPlane");
-    if (!mapPlane) debugLog("❌ Error: Could not find mapPlane element");
+    const scene = document.querySelector('a-scene');
+    const anchor = document.querySelector('#anchor');
 
+    if (!mapPlane) debugLog("⚠️ Warning: Could not find mapPlane element");
+    if (!scene) debugLog("⚠️ Warning: Could not find a-scene element");
+    if (!anchor) debugLog("⚠️ Warning: Could not find anchor element");
+
+    // Enhanced scanning UI
     const scanningElement = document.querySelector('.mindar-ui-overlay .scanning');
     if (scanningElement) {
       scanningElement.insertAdjacentHTML(
@@ -154,21 +178,22 @@
       debugLog("Added scanning instructions to UI");
     }
 
-    const scene = document.querySelector('a-scene');
+    // AR Event Handlers
     if (scene) {
       scene.addEventListener('arReady', () => {
         debugLog("AR system is ready");
         const video = document.querySelector('video.mindar-image-video');
         if (video) {
           video.addEventListener('play', () => {
-            video.style.filter = 'contrast(1.3) saturate(1.3)';
+            video.style.filter = 'contrast(1.2) saturate(1.2)';
             debugLog("Video stream started, applied filters");
           });
         }
-        const anchor = document.querySelector('#anchor');
+        
         if (anchor) {
           anchor.addEventListener('targetFound', () => {
             debugLog("✅ Image target detected - content should be visible");
+            debugLog(`Anchor visibility: ${anchor.getAttribute('visible')}`);
           });
           anchor.addEventListener('targetLost', () => {
             debugLog("❌ Image target lost - content hidden");
@@ -178,53 +203,89 @@
 
       scene.addEventListener('renderstart', () => {
         debugLog("A-Frame rendering started");
+        if (document.querySelector('video.mindar-image-video')) {
+          debugLog("Video element found and active");
+        }
       });
     }
 
+    // Map functionality with improved error handling
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
     function createSimpleMapUrl(userPos) {
-      return `http://localhost:3001/api/staticmap?userLat=${userPos.lat}&userLng=${userPos.lng}`;
+      // Fallback to static image if local server not available
+      const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=17&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
+      
+      try {
+        return `http://localhost:3001/api/staticmap?userLat=${userPos.lat}&userLng=${userPos.lng}` || fallbackUrl;
+      } catch (e) {
+        debugLog(`Map URL generation error: ${e.message}`);
+        return fallbackUrl;
+      }
     }
 
     function setMapTexture(url) {
-      setTimeout(() => {
-        if (mapPlane) {
-          mapPlane.setAttribute("visible", "true");
-          mapPlane.setAttribute("material", "shader: flat; src: " + url);
-          debugLog(`Map texture set with URL: ${url}`);
-        }
-      }, 500); // delay to ensure element is rendered
+      if (!mapPlane) {
+        debugLog("⚠️ Cannot set map texture - mapPlane not found");
+        return;
+      }
+
+      const img = new Image();
+      img.onload = function() {
+        mapPlane.setAttribute("material", "shader: flat; src: " + url);
+        debugLog(`Map texture loaded successfully: ${url}`);
+      };
+      img.onerror = function() {
+        debugLog(`⚠️ Failed to load map image from ${url}, using color fallback`);
+        mapPlane.setAttribute("color", "#4a954e");
+        mapPlane.removeAttribute("material");
+      };
+      img.src = url;
     }
 
+    // Geolocation with improved error handling
     debugLog("Attempting to get geolocation...");
-    navigator.geolocation.getCurrentPosition((position) => {
-      const userPos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-      const mapUrl = createSimpleMapUrl(userPos);
-      debugLog(`📍 User position: ${JSON.stringify(userPos)}`);
-      debugLog(`🗺️ Generated map URL: ${mapUrl}`);
-      setMapTexture(mapUrl);
-    }, (err) => {
-      debugLog(`❌ Geolocation error: ${err.message}`);
-      const fallbackUrl = "https://maps.googleapis.com/maps/api/staticmap?center=14.603919,120.987760&zoom=15&size=400x300&markers=color:red%7C14.603919,120.987760";
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userPos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          debugLog(`📍 User position obtained: ${JSON.stringify(userPos)}`);
+          const mapUrl = createSimpleMapUrl(userPos);
+          debugLog(`🗺️ Generated map URL: ${mapUrl}`);
+          setMapTexture(mapUrl);
+        },
+        (err) => {
+          debugLog(`❌ Geolocation error: ${err.message}`);
+          const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
+          setMapTexture(fallbackUrl);
+          debugLog("Using fallback map image");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      debugLog("❌ Geolocation not supported by browser");
+      const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
       setMapTexture(fallbackUrl);
-      debugLog("Using fallback map image");
-    }, {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
-    });
+    }
 
+    // Final initialization check
     window.addEventListener('load', () => {
       debugLog("Page fully loaded");
-      if (window.MINDAR) debugLog("MindAR library loaded successfully");
-      else debugLog("❌ MindAR library not loaded");
-      if (window.AFRAME) debugLog("A-Frame library loaded successfully");
-      else debugLog("❌ A-Frame library not loaded");
+      debugLog(`A-Frame ${AFRAME.version} loaded`);
+      debugLog(`MindAR ${MINDAR.VERSION} loaded`);
+      
+      // Check if elements are properly initialized
+      if (anchor) {
+        debugLog(`Anchor initialized with targetIndex: ${anchor.components['mindar-image-target'].targetIndex}`);
+      }
     });
   </script>
 </body>
