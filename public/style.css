@@ -1,26 +1,37 @@
+/* BASE STYLES */
 body {
   margin: 0;
+  padding: 0;
   overflow: hidden;
+  width: 100vw;
+  height: 100vh;
 }
 
-/* Fixed camera video styling */
-body > video,
-body video.mindar-image-video,
-body video[data-mindar-video] {
+/* VIDEO FEED LAYER */
+body > video.mindar-image-video {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  background-color: black !important;
   z-index: 0 !important;
   pointer-events: none !important;
-  filter: contrast(1.2) saturate(1.1) !important;
-  -webkit-filter: contrast(1.2) saturate(1.1) !important;
+  
+  /* Visual enhancements */
+  filter: 
+    contrast(1.2) 
+    saturate(1.1) 
+    brightness(0.9) !important;
+  -webkit-filter: 
+    contrast(1.2) 
+    saturate(1.1) 
+    brightness(0.9) !important;
+  image-rendering: crisp-edges;
+  transform: none !important;
 }
 
-/* AR Scene Container */
+/* AR CONTENT LAYER */
 a-scene {
   position: fixed;
   top: 0;
@@ -28,48 +39,111 @@ a-scene {
   width: 100%;
   height: 100%;
   z-index: 1;
-  pointer-events: auto !important;
+  pointer-events: auto;
+  overflow: hidden;
 }
 
-/* Enhanced scanning guide */
+/* SCANNING UI ENHANCEMENTS */
+.mindar-ui-overlay {
+  pointer-events: none;
+}
+
 .mindar-ui-overlay::before {
   content: "";
   position: absolute;
-  top: 25%;
-  left: 25%;
-  right: 25%;
-  bottom: 25%;
-  border: 2px dashed rgba(255,255,255,0.6);
-  border-radius: 8px;
-  pointer-events: none;
-  animation: pulseBorder 2s infinite ease-in-out;
-}
-
-@keyframes pulseBorder {
-  0%, 100% { opacity: 0.6; transform: scale(0.98); }
-  50% { opacity: 0.9; transform: scale(1.02); }
-}
-
-/* Focus assist text */
-.mindar-ui-overlay::after {
-  content: "Point camera at marker";
-  position: absolute;
+  top: 20%;
+  left: 20%;
+  right: 20%;
   bottom: 20%;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  animation: scanPulse 2.5s infinite ease-in-out;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes scanPulse {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+.mindar-ui-overlay::after {
+  content: "Align marker within frame";
+  position: absolute;
+  bottom: 22%;
   left: 0;
   right: 0;
   color: white;
   text-align: center;
-  font-size: 1em;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  animation: fadeInOut 3s infinite;
-  opacity: 0.8;
+  font-size: 1.1em;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  animation: textFade 3.5s infinite;
 }
 
-/* Your existing animations (unchanged but ensure they don't conflict) */
-@keyframes pulse { /* ... */ }
-@keyframes slideUp { /* ... */ }
+@keyframes textFade {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
 
-/* Map overlay adjustments */
-.map-overlay {
-  z-index: 10; /* Higher than video but lower than UI */
+/* INTERACTIVE ELEMENTS */
+.clickable {
+  cursor: pointer;
+  transition: 
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.clickable:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+/* MAP VISUALIZATION */
+#mapPlane {
+  transition: transform 0.5s ease-out;
+}
+
+#mapPlane:hover {
+  transform: scale(1.03) rotateZ(1deg);
+}
+
+/* DEBUG CONSOLE */
+#debug-console {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.75);
+  color: #f0f0f0;
+  padding: 8px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  max-height: 120px;
+  overflow-y: auto;
+  z-index: 10000;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ANIMATION PRESETS */
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 0.9; }
+}
+
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* SAFETY OVERRIDES */
+.a-entity[visible="false"] {
+  visibility: visible !important;
+  opacity: 1 !important;
 }
