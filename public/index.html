@@ -8,20 +8,20 @@
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ADDED CRITICAL FIXES */
+    /* CRITICAL FIXES ADDED */
     a-scene {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      pointer-events: auto;
+      position: fixed !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1 !important;
     }
     
     body > video.mindar-image-video {
       z-index: 0 !important;
+      transform: none !important;
     }
-    
-    /* Your existing styles */
+
+    /* YOUR EXISTING STYLES */
     .clickable {
       cursor: pointer;
       transition: all 0.3s ease;
@@ -80,15 +80,12 @@
 
     <a-camera position="0 0 0"></a-camera>
 
-    <!-- Anchor element remains unchanged but will work now -->
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- All your existing card content remains exactly the same -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
-        <!-- 3D Brand Title -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
@@ -97,14 +94,12 @@
                 scale="1 1 1"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"></a-text>
 
-        <!-- Slogan -->
         <a-text value="Comfort Away From Home"
                 position="0 0.28 0.02"
                 align="center"
                 width="1"
                 color="#d2a647"></a-text>
 
-        <!-- Contact Info -->
         <a-text value="📞 09225927385"
                 position="-0.42 0.16 0.02"
                 width="1"
@@ -125,12 +120,10 @@
                 width="1"
                 color="#333"></a-text>
 
-        <!-- Dynamic Map -->
         <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
                  material="shader: flat"
                  animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true"></a-plane>
 
-        <!-- Website CTA -->
         <a-text value="Visit Our Website"
                 position="0 -0.42 0.02"
                 align="center"
@@ -146,7 +139,7 @@
   <div id="debug-console"></div>
 
   <script>
-    // Enhanced debug system with visibility monitoring
+    // Enhanced debug system
     const debugConsole = document.getElementById('debug-console');
     function debugLog(message) {
       const entry = document.createElement('div');
@@ -156,100 +149,68 @@
       console.log(message);
     }
 
-    // ADDED: Visibility monitoring function
-    function monitorAnchorVisibility(anchor) {
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'visible') {
-            debugLog(`🔍 Anchor visibility changed to: ${anchor.getAttribute('visible')}`);
-          }
-        });
-      });
-      
-      observer.observe(anchor, {
-        attributes: true,
-        attributeFilter: ['visible']
-      });
-    }
-
-    // System readiness checks
-    function checkSystemReadiness() {
-      if (!window.AFRAME) {
-        debugLog("❌ Critical Error: A-Frame not loaded");
-        return false;
-      }
-      if (!window.MINDAR) {
-        debugLog("❌ Critical Error: MindAR not loaded");
-        return false;
-      }
-      return true;
-    }
-
-    debugLog("Initializing AR application...");
-    if (!checkSystemReadiness()) {
-      debugLog("Application cannot start due to missing dependencies");
-    }
-
-    // DOM element references
-    const mapPlane = document.getElementById("mapPlane");
-    const scene = document.querySelector('a-scene');
+    // Robust visibility enforcement
     const anchor = document.querySelector('#anchor');
+    let visibilityFixActive = false;
 
-    if (!mapPlane) debugLog("⚠️ Warning: Could not find mapPlane element");
-    if (!scene) debugLog("⚠️ Warning: Could not find a-scene element");
-    if (!anchor) {
-      debugLog("⚠️ Warning: Could not find anchor element");
-    } else {
-      // ADDED: Start monitoring anchor visibility
-      monitorAnchorVisibility(anchor);
+    function enforceVisibility() {
+      if (!anchor || visibilityFixActive) return;
+      
+      visibilityFixActive = true;
+      debugLog("🔧 Starting visibility enforcement");
+      
+      // Primary enforcement
+      anchor.setAttribute('visible', 'true');
+      
+      // Backup method - add transparent child entity
+      const backup = document.createElement('a-entity');
+      backup.setAttribute('geometry', 'primitive: plane; width: 0.01; height: 0.01');
+      backup.setAttribute('material', 'color: transparent; transparent: true; opacity: 0');
+      backup.setAttribute('visible', 'true');
+      anchor.appendChild(backup);
+      
+      // Continuous monitoring
+      const visibilityCheck = setInterval(() => {
+        if (anchor.getAttribute('visible') !== 'true') {
+          debugLog("⚠️ Visibility lost - reapplying fix");
+          anchor.setAttribute('visible', 'true');
+          backup.setAttribute('visible', 'true');
+        }
+      }, 100);
+      
+      // Cleanup when target lost
+      anchor.addEventListener('targetLost', () => {
+        clearInterval(visibilityCheck);
+        anchor.removeChild(backup);
+        visibilityFixActive = false;
+        debugLog("🔧 Visibility enforcement ended");
+      }, { once: true });
     }
 
-    // Enhanced scanning UI
-    const scanningElement = document.querySelector('.mindar-ui-overlay .scanning');
-    if (scanningElement) {
-      scanningElement.insertAdjacentHTML(
-        'beforeend',
-        '<div style="margin-top: 12px; color: white; text-align: center;">Hold steady 30cm from card</div>'
-      );
-      debugLog("Added scanning instructions to UI");
-    }
-
-    // AR Event Handlers
+    // AR Initialization
+    const scene = document.querySelector('a-scene');
     if (scene) {
       scene.addEventListener('arReady', () => {
-        debugLog("AR system is ready");
-        const video = document.querySelector('video.mindar-image-video');
-        if (video) {
-          video.addEventListener('play', () => {
-            video.style.filter = 'contrast(1.2) saturate(1.2)';
-            debugLog("Video stream started, applied filters");
-          });
-        }
+        debugLog("AR system ready");
         
         if (anchor) {
           anchor.addEventListener('targetFound', () => {
-            debugLog("✅ Image target detected - content should be visible");
-            debugLog(`Anchor visibility: ${anchor.getAttribute('visible')}`);
-            // ADDED: Force visibility check
-            setTimeout(() => {
-              debugLog(`Post-detection visibility check: ${anchor.getAttribute('visible')}`);
-            }, 100);
+            debugLog("🎯 Target found");
+            enforceVisibility();
+            
+            // Double-check after rendering cycle
+            requestAnimationFrame(() => {
+              if (anchor.getAttribute('visible') !== 'true') {
+                debugLog("🔄 Reconfirming visibility");
+                anchor.setAttribute('visible', 'true');
+              }
+            });
           });
-          anchor.addEventListener('targetLost', () => {
-            debugLog("❌ Image target lost - content hidden");
-          });
-        }
-      });
-
-      scene.addEventListener('renderstart', () => {
-        debugLog("A-Frame rendering started");
-        if (document.querySelector('video.mindar-image-video')) {
-          debugLog("Video element found and active");
         }
       });
     }
 
-    // Your existing map and geolocation functionality remains unchanged
+    // Your existing map and geolocation functionality
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
@@ -265,6 +226,7 @@
     }
 
     function setMapTexture(url) {
+      const mapPlane = document.getElementById("mapPlane");
       if (!mapPlane) {
         debugLog("⚠️ Cannot set map texture - mapPlane not found");
         return;
@@ -283,7 +245,7 @@
       img.src = url;
     }
 
-    // Geolocation with improved error handling
+    // Geolocation
     debugLog("Attempting to get geolocation...");
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -315,14 +277,11 @@
       setMapTexture(fallbackUrl);
     }
 
-    // Final initialization check
+    // Initialization
     window.addEventListener('load', () => {
-      debugLog("Page fully loaded");
-      debugLog(`A-Frame ${AFRAME.version} loaded`);
-      debugLog(`MindAR ${MINDAR.VERSION} loaded`);
-      
-      if (anchor) {
-        debugLog(`Anchor initialized with targetIndex: ${anchor.components['mindar-image-target'].targetIndex}`);
+      debugLog("System initialized");
+      if (!window.AFRAME || !window.MINDAR) {
+        debugLog("❌ Missing required libraries");
       }
     });
   </script>
