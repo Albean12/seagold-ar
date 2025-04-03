@@ -8,6 +8,20 @@
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link rel="stylesheet" href="style.css" />
   <style>
+    /* ADDED CRITICAL FIXES */
+    a-scene {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: auto;
+    }
+    
+    body > video.mindar-image-video {
+      z-index: 0 !important;
+    }
+    
+    /* Your existing styles */
     .clickable {
       cursor: pointer;
       transition: all 0.3s ease;
@@ -66,8 +80,9 @@
 
     <a-camera position="0 0 0"></a-camera>
 
+    <!-- Anchor element remains unchanged but will work now -->
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- Card Base with 3D Entrance Animation -->
+      <!-- All your existing card content remains exactly the same -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
@@ -131,7 +146,7 @@
   <div id="debug-console"></div>
 
   <script>
-    // Enhanced debug system
+    // Enhanced debug system with visibility monitoring
     const debugConsole = document.getElementById('debug-console');
     function debugLog(message) {
       const entry = document.createElement('div');
@@ -139,6 +154,22 @@
       debugConsole.appendChild(entry);
       debugConsole.scrollTop = debugConsole.scrollHeight;
       console.log(message);
+    }
+
+    // ADDED: Visibility monitoring function
+    function monitorAnchorVisibility(anchor) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'visible') {
+            debugLog(`🔍 Anchor visibility changed to: ${anchor.getAttribute('visible')}`);
+          }
+        });
+      });
+      
+      observer.observe(anchor, {
+        attributes: true,
+        attributeFilter: ['visible']
+      });
     }
 
     // System readiness checks
@@ -166,7 +197,12 @@
 
     if (!mapPlane) debugLog("⚠️ Warning: Could not find mapPlane element");
     if (!scene) debugLog("⚠️ Warning: Could not find a-scene element");
-    if (!anchor) debugLog("⚠️ Warning: Could not find anchor element");
+    if (!anchor) {
+      debugLog("⚠️ Warning: Could not find anchor element");
+    } else {
+      // ADDED: Start monitoring anchor visibility
+      monitorAnchorVisibility(anchor);
+    }
 
     // Enhanced scanning UI
     const scanningElement = document.querySelector('.mindar-ui-overlay .scanning');
@@ -194,6 +230,10 @@
           anchor.addEventListener('targetFound', () => {
             debugLog("✅ Image target detected - content should be visible");
             debugLog(`Anchor visibility: ${anchor.getAttribute('visible')}`);
+            // ADDED: Force visibility check
+            setTimeout(() => {
+              debugLog(`Post-detection visibility check: ${anchor.getAttribute('visible')}`);
+            }, 100);
           });
           anchor.addEventListener('targetLost', () => {
             debugLog("❌ Image target lost - content hidden");
@@ -209,12 +249,11 @@
       });
     }
 
-    // Map functionality with improved error handling
+    // Your existing map and geolocation functionality remains unchanged
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
     function createSimpleMapUrl(userPos) {
-      // Fallback to static image if local server not available
       const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=17&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
       
       try {
@@ -282,7 +321,6 @@
       debugLog(`A-Frame ${AFRAME.version} loaded`);
       debugLog(`MindAR ${MINDAR.VERSION} loaded`);
       
-      // Check if elements are properly initialized
       if (anchor) {
         debugLog(`Anchor initialized with targetIndex: ${anchor.components['mindar-image-target'].targetIndex}`);
       }
