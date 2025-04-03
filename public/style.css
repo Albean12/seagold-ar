@@ -5,10 +5,9 @@ body {
   overflow: hidden;
   width: 100vw;
   height: 100vh;
-  background-color: black; /* Ensures no white flash during loading */
 }
 
-/* VIDEO FEED LAYER - CRITICAL FOR MINDAR */
+/* VIDEO FEED LAYER */
 body > video.mindar-image-video {
   position: fixed !important;
   top: 0 !important;
@@ -18,23 +17,33 @@ body > video.mindar-image-video {
   object-fit: cover !important;
   z-index: 0 !important;
   pointer-events: none !important;
-  /* Removed filters as they can interfere with AR tracking */
+  
+  /* Visual enhancements */
+  filter: 
+    contrast(1.2) 
+    saturate(1.1) 
+    brightness(0.9) !important;
+  -webkit-filter: 
+    contrast(1.2) 
+    saturate(1.1) 
+    brightness(0.9) !important;
+  image-rendering: crisp-edges;
   transform: none !important;
 }
 
-/* AR CONTENT LAYER - MUST STAY ON TOP */
+/* AR CONTENT LAYER */
 a-scene {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1 !important; /* Ensured priority */
+  z-index: 1;
   pointer-events: auto;
   overflow: hidden;
 }
 
-/* MINDAR UI ENHANCEMENTS */
+/* SCANNING UI ENHANCEMENTS */
 .mindar-ui-overlay {
   pointer-events: none;
 }
@@ -52,6 +61,17 @@ a-scene {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
+@keyframes scanPulse {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
 .mindar-ui-overlay::after {
   content: "Align marker within frame";
   position: absolute;
@@ -66,40 +86,9 @@ a-scene {
   animation: textFade 3.5s infinite;
 }
 
-/* ANIMATIONS */
-@keyframes scanPulse {
-  0%, 100% { 
-    opacity: 0.6;
-    transform: scale(0.95);
-  }
-  50% { 
-    opacity: 0.9;
-    transform: scale(1.05);
-  }
-}
-
 @keyframes textFade {
   0%, 100% { opacity: 0.7; }
   50% { opacity: 1; }
-}
-
-/* MAP SPECIFIC STYLES - CRITICAL FIXES */
-/* MAP STYLES - CORRECTED VERSION */
-#mapPlane {
-  transition: transform 0.5s ease-out;
-  mix-blend-mode: normal !important;
-}
-
-/* This replaces the invalid material declaration */
-#mapPlane [material] {
-  shader: standard;
-  metalness: 0;
-  roughness: 1;
-}
-
-#mapPlane[data-state="loading"] {
-  background-color: rgba(200, 200, 200, 0.2);
-  animation: gentlePulse 1.5s infinite;
 }
 
 /* INTERACTIVE ELEMENTS */
@@ -115,17 +104,13 @@ a-scene {
   transform: scale(1.02);
 }
 
-/* PERFORMANCE OPTIMIZATIONS */
-#anchor {
-  will-change: transform, opacity;
-  backface-visibility: visible;
-  transform-style: preserve-3d;
-  /* Removed visibility overrides as they conflict with MindAR */
+/* MAP VISUALIZATION */
+#mapPlane {
+  transition: transform 0.5s ease-out;
 }
 
-.a-entity[mindar-image-target] {
-  transform-style: preserve-3d;
-  backface-visibility: visible !important;
+#mapPlane:hover {
+  transform: scale(1.03) rotateZ(1deg);
 }
 
 /* DEBUG CONSOLE */
@@ -146,20 +131,19 @@ a-scene {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* CRITICAL FIXES */
+/* ANIMATION PRESETS */
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 0.9; }
+}
+
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* SAFETY OVERRIDES */
 .a-entity[visible="false"] {
-  display: none !important; /* Changed from visibility/opacity */
+  visibility: visible !important;
+  opacity: 1 !important;
 }
-
-/* TEXT RENDERING */
-.a-text {
-  font-family: 'Arial', sans-serif;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  pointer-events: none; /* Prevents text from blocking clicks */
-}
-
-/* REMOVED CONFLICTING STYLES */
-/* Removed all filter effects from video element */
-/* Removed multiply blend-mode from map */
-/* Simplified animation classes */

@@ -7,6 +7,64 @@
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* CRITICAL FIXES ADDED */
+    a-scene {
+      position: fixed !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1 !important;
+    }
+    
+    body > video.mindar-image-video {
+      z-index: 0 !important;
+      transform: none !important;
+    }
+
+    /* YOUR EXISTING STYLES */
+    .clickable {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .clickable:hover {
+      opacity: 0.8;
+    }
+    .dorm-info {
+      font-family: Arial;
+      color: #333;
+      line-height: 1.2;
+    }
+    body > video.mindar-image-video {
+      filter: contrast(1.2) saturate(1.1) !important;
+      -webkit-filter: contrast(1.2) saturate(1.1) !important;
+      image-rendering: crisp-edges !important;
+    }
+    .mindar-ui-overlay .scanning::after {
+      content: "";
+      position: absolute;
+      top: 25%;
+      left: 25%;
+      right: 25%;
+      bottom: 25%;
+      border: 2px dashed rgba(255,255,255,0.7);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+    #debug-console {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 10000;
+    }
+  </style>
 </head>
 <body>
   <a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; 
@@ -22,33 +80,12 @@
 
     <a-camera position="0 0 0"></a-camera>
 
-    <!-- Hidden assets for animations -->
-    <img id="topBanner" src="assets/top-banner.png" crossorigin="anonymous">
-    <img id="leftPanel" src="assets/side-panel-left.png" crossorigin="anonymous">
-    <img id="rightPanel" src="assets/images/seagoldpinicon.png" crossorigin="anonymous">
-    <img id="mapFallback" src="assets/map-fallback.png" crossorigin="anonymous">
-    <img id="mapOverlay" src="assets/map-overlay.png" crossorigin="anonymous">
-    <img id="mapLoading" src="assets/map-loading.png" crossorigin="anonymous">
-
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- Animated Top Banner -->
-      <a-image class="slide-in-top" src="#topBanner" position="0 0.6 0.01" width="1.2" height="0.2"
-               animation="property: position; from: 0 1 0.01; to: 0 0.6 0.01; dur: 1000; easing: easeOutBack"></a-image>
-
-      <!-- Main Card -->
-      <a-plane class="clickable card-main" position="0 0 0" width="1" height="0.9" color="#f2ede3"
+      <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
-        <!-- Animated Side Images -->
-        <a-image class="slide-in-left" src="#leftPanel" position="-0.6 0 0.01" width="0.25" height="0.4"
-                 animation="property: position; from: -1 0 0.01; to: -0.6 0 0.01; dur: 1200; delay: 500; easing: easeOutQuad"></a-image>
-        
-        <a-image class="slide-in-right" src="#rightPanel" position="0.6 0 0.01" width="0.25" height="0.4"
-                 animation="property: position; from: 1 0 0.01; to: 0.6 0 0.01; dur: 1200; delay: 700; easing: easeOutQuad"></a-image>
-
-        <!-- Main Content -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
@@ -83,13 +120,9 @@
                 width="1"
                 color="#333"></a-text>
 
-        <!-- Enhanced Map Section -->
-        <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" 
-                 material="shader: flat; src: #mapLoading"
-                 data-state="loading"
-                 animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true">
-          <a-image class="map-overlay" src="#mapOverlay" width="0.5" height="0.3"></a-image>
-        </a-plane>
+        <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
+                 material="shader: flat"
+                 animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true"></a-plane>
 
         <a-text value="Visit Our Website"
                 position="0 -0.42 0.02"
@@ -116,79 +149,80 @@
       console.log(message);
     }
 
-    // Animation Controller - FIXED
-    const animationManager = {
-      animations: [],
-      add: function(el) {
-        if (el.components && el.components.animation) {
-          this.animations.push(el.components.animation);
-        }
-      },
-      stopAll: function() {
-        this.animations.forEach(anim => {
-          try {
-            if (anim && anim.stop) anim.stop();
-          } catch(e) {
-            debugLog(`⚠️ Animation stop error: ${e.message}`);
-          }
-        });
-        this.animations = [];
-      }
-    };
+    // Robust visibility enforcement
+    const anchor = document.querySelector('#anchor');
+    let visibilityFixActive = false;
 
-    // Robust visibility enforcement - IMPROVED
-    const visibilityManager = {
-      interval: null,
-      backupEntity: null,
-      start: function(anchor) {
-        this.stop();
-        debugLog("🔧 Starting visibility enforcement");
-        
-        anchor.setAttribute('visible', 'true');
-        
-        this.backupEntity = document.createElement('a-entity');
-        this.backupEntity.setAttribute('geometry', 'primitive: plane; width: 0.01; height: 0.01');
-        this.backupEntity.setAttribute('material', 'color: white; transparent: true; opacity: 0.001');
-        anchor.appendChild(this.backupEntity);
-
-        this.interval = setInterval(() => {
-          if (anchor.getAttribute('visible') !== 'true') {
-            debugLog("⚠️ Visibility lost - reapplying fix");
-            anchor.setAttribute('visible', 'true');
-            this.backupEntity.setAttribute('visible', 'true');
-          }
-        }, 500);
-      },
-      stop: function() {
-        if (this.interval) clearInterval(this.interval);
-        if (this.backupEntity && this.backupEntity.parentNode) {
-          this.backupEntity.parentNode.removeChild(this.backupEntity);
+    function enforceVisibility() {
+      if (!anchor || visibilityFixActive) return;
+      
+      visibilityFixActive = true;
+      debugLog("🔧 Starting visibility enforcement");
+      
+      // Primary enforcement
+      anchor.setAttribute('visible', 'true');
+      
+      // Backup method - add transparent child entity
+      const backup = document.createElement('a-entity');
+      backup.setAttribute('geometry', 'primitive: plane; width: 0.01; height: 0.01');
+      backup.setAttribute('material', 'color: transparent; transparent: true; opacity: 0');
+      backup.setAttribute('visible', 'true');
+      anchor.appendChild(backup);
+      
+      // Continuous monitoring
+      const visibilityCheck = setInterval(() => {
+        if (anchor.getAttribute('visible') !== 'true') {
+          debugLog("⚠️ Visibility lost - reapplying fix");
+          anchor.setAttribute('visible', 'true');
+          backup.setAttribute('visible', 'true');
         }
+      }, 100);
+      
+      // Cleanup when target lost
+      anchor.addEventListener('targetLost', () => {
+        clearInterval(visibilityCheck);
+        anchor.removeChild(backup);
+        visibilityFixActive = false;
         debugLog("🔧 Visibility enforcement ended");
-      }
-    };
+      }, { once: true });
+    }
 
-    // Enhanced Map Functionality - FIXED
+    // AR Initialization
+    const scene = document.querySelector('a-scene');
+    if (scene) {
+      scene.addEventListener('arReady', () => {
+        debugLog("AR system ready");
+        
+        if (anchor) {
+          anchor.addEventListener('targetFound', () => {
+            debugLog("🎯 Target found");
+            enforceVisibility();
+            
+            // Double-check after rendering cycle
+            requestAnimationFrame(() => {
+              if (anchor.getAttribute('visible') !== 'true') {
+                debugLog("🔄 Reconfirming visibility");
+                anchor.setAttribute('visible', 'true');
+              }
+            });
+          });
+        }
+      });
+    }
+
+    // Your existing map and geolocation functionality
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
-    function createSimpleMapUrl() {
-      // Build URL with all required parameters
-      const baseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
-      const params = new URLSearchParams({
-        center: `${dormPos.lat},${dormPos.lng}`,
-        zoom: '17',
-        size: '400x300',
-        scale: '2',
-        maptype: 'roadmap',
-        markers: `color:0xFF0000|${dormPos.lat},${dormPos.lng}`,
-        key: GOOGLE_API_KEY
-      });
+    function createSimpleMapUrl(userPos) {
+      const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=17&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
       
-      // Debug the generated URL
-      const finalUrl = `${baseUrl}?${params.toString()}`;
-      debugLog(`🗺️ Generated Map URL: ${finalUrl.split('?')[0]}`);
-      return finalUrl;
+      try {
+        return `http://localhost:3001/api/staticmap?userLat=${userPos.lat}&userLng=${userPos.lng}` || fallbackUrl;
+      } catch (e) {
+        debugLog(`Map URL generation error: ${e.message}`);
+        return fallbackUrl;
+      }
     }
 
     function setMapTexture(url) {
@@ -198,97 +232,49 @@
         return;
       }
 
-      // Create temporary debug image
-      const debugImg = document.createElement('img');
-      debugImg.style.position = 'fixed';
-      debugImg.style.top = '10px';
-      debugImg.style.left = '10px';
-      debugImg.style.width = '200px';
-      debugImg.style.zIndex = '100000';
-      debugImg.style.border = '2px solid red';
-      debugImg.src = url;
-      document.body.appendChild(debugImg);
-      setTimeout(() => document.body.removeChild(debugImg), 10000);
-
       const img = new Image();
-      img.crossOrigin = "Anonymous";
-      
-      const loadTimeout = setTimeout(() => {
-        debugLog("⚠️ Map loading timeout, using fallback");
-        mapPlane.setAttribute("material", "shader: standard; src: #mapFallback");
-        mapPlane.removeAttribute('data-state');
-      }, 5000);
-
       img.onload = function() {
-        clearTimeout(loadTimeout);
-        try {
-          // Verify image data
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          
-          // Check if image has content
-          const pixelData = ctx.getImageData(0, 0, 1, 1).data;
-          if (pixelData[3] === 0) { // If alpha channel is 0 (fully transparent)
-            throw new Error("Received blank image from API");
-          }
-
-          // Apply texture with standard shader for better rendering
-          mapPlane.setAttribute("material", `shader: standard; src: ${url}; metalness: 0; roughness: 1`);
-          mapPlane.removeAttribute('data-state');
-          debugLog("🗺️ Map texture loaded successfully");
-        } catch(e) {
-          debugLog(`⚠️ Error applying map texture: ${e.message}`);
-          mapPlane.setAttribute("material", "shader: standard; src: #mapFallback");
-          mapPlane.removeAttribute('data-state');
-        }
+        mapPlane.setAttribute("material", "shader: flat; src: " + url);
+        debugLog(`Map texture loaded successfully: ${url}`);
       };
-      
       img.onerror = function() {
-        clearTimeout(loadTimeout);
-        debugLog("⚠️ Failed to load map image, using fallback");
-        mapPlane.setAttribute("material", "shader: standard; src: #mapFallback");
-        mapPlane.removeAttribute('data-state');
+        debugLog(`⚠️ Failed to load map image from ${url}, using color fallback`);
+        mapPlane.setAttribute("color", "#4a954e");
+        mapPlane.removeAttribute("material");
       };
-      
       img.src = url;
     }
 
-    // AR Initialization - UPDATED
-    const scene = document.querySelector('a-scene');
-    if (scene) {
-      scene.addEventListener('arReady', () => {
-        debugLog("AR system ready");
-        
-        const anchor = document.querySelector('#anchor');
-        if (!anchor) return;
-
-        anchor.addEventListener('targetFound', () => {
-          debugLog("🎯 Target found");
-          visibilityManager.start(anchor);
-          
-          // Start animations properly
-          document.querySelectorAll('[animation]').forEach(el => {
-            animationManager.add(el);
-            if (el.components.animation) {
-              el.components.animation.play();
-            }
-          });
-
-          // Load map with fresh URL each time
-          const mapUrl = createSimpleMapUrl() + '&' + new Date().getTime(); // Cache busting
-          debugLog(`🗺️ Loading map...`);
+    // Geolocation
+    debugLog("Attempting to get geolocation...");
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userPos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          debugLog(`📍 User position obtained: ${JSON.stringify(userPos)}`);
+          const mapUrl = createSimpleMapUrl(userPos);
+          debugLog(`🗺️ Generated map URL: ${mapUrl}`);
           setMapTexture(mapUrl);
-        });
-
-        anchor.addEventListener('targetLost', () => {
-          debugLog("🎯 Target lost");
-          visibilityManager.stop();
-          animationManager.stopAll();
-        });
-      });
+        },
+        (err) => {
+          debugLog(`❌ Geolocation error: ${err.message}`);
+          const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
+          setMapTexture(fallbackUrl);
+          debugLog("Using fallback map image");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      debugLog("❌ Geolocation not supported by browser");
+      const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
+      setMapTexture(fallbackUrl);
     }
 
     // Initialization
@@ -297,15 +283,6 @@
       if (!window.AFRAME || !window.MINDAR) {
         debugLog("❌ Missing required libraries");
       }
-      
-      // Initial map load
-      const mapUrl = createSimpleMapUrl();
-      setMapTexture(mapUrl);
-    });
-
-    // Global error handling
-    window.addEventListener('error', (e) => {
-      debugLog(`⚠️ Global error: ${e.message}`);
     });
   </script>
 </body>
