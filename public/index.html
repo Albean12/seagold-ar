@@ -8,7 +8,7 @@
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ==================== SCENE LAYERING ==================== */
+    /* SCENE LAYERING */
     a-scene {
       position: fixed;
       width: 100%;
@@ -16,7 +16,7 @@
       z-index: 1;
     }
     
-    /* ==================== VIDEO FEED ==================== */
+    /* VIDEO FEED */
     body > video.mindar-image-video {
       z-index: 0;
       transform: none;
@@ -25,7 +25,7 @@
       image-rendering: crisp-edges;
     }
     
-    /* ==================== INTERACTIVE ELEMENTS ==================== */
+    /* INTERACTIVE ELEMENTS */
     .clickable {
       cursor: pointer;
       transition: all 0.3s ease;
@@ -34,19 +34,7 @@
       opacity: 0.8;
     }
     
-    /* ==================== LINK STYLES ==================== */
-    .url-link {
-      color: #0066cc;
-      text-decoration: underline;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .url-link:hover {
-      color: #004499;
-      text-decoration: none;
-    }
-    
-    /* ==================== DEBUG CONSOLE ==================== */
+    /* DEBUG CONSOLE */
     #debug-console {
       position: fixed;
       bottom: 0;
@@ -62,7 +50,7 @@
       z-index: 10000;
     }
     
-    /* ==================== SCANNING UI ==================== */
+    /* SCANNING UI */
     .mindar-ui-overlay .scanning::after {
       content: "";
       position: absolute;
@@ -77,7 +65,7 @@
   </style>
 </head>
 <body>
-  <!-- ==================== AR SCENE CONTAINER ==================== -->
+  <!-- AR SCENE CONTAINER -->
   <a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; 
                         autoStart: true; 
                         uiScanning: true; 
@@ -91,15 +79,15 @@
 
     <a-camera position="0 0 0"></a-camera>
 
-    <!-- ==================== TARGET ANCHOR POINT ==================== -->
+    <!-- TARGET ANCHOR POINT -->
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- ==================== BUSINESS CARD ==================== -->
+      <!-- BUSINESS CARD -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
-        <!-- ==================== CARD CONTENT ==================== -->
+        <!-- CARD CONTENT -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
@@ -129,20 +117,17 @@
                 width="1"
                 color="#333"></a-text>
 
-        <!-- ==================== CLICKABLE WEB URL ==================== -->
         <a-text value="🌐 Seagold Dormitory (Facebook)"
                 position="-0.42 -0.08 0.02"
                 width="1"
-                color="#0066cc"
-                class="url-link"
-                onclick="window.open('https://facebook.com/seagolddormitory', '_blank')"></a-text>
+                color="#333"></a-text>
 
-        <!-- ==================== INTERACTIVE MAP ==================== -->
+        <!-- INTERACTIVE MAP -->
         <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
                  material="shader: flat"
                  animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true"></a-plane>
 
-        <!-- ==================== CALL TO ACTION ==================== -->
+        <!-- CALL TO ACTION -->
         <a-text value="Visit Our Website"
                 position="0 -0.42 0.02"
                 align="center"
@@ -155,11 +140,11 @@
     </a-entity>
   </a-scene>
 
-  <!-- ==================== DEBUG CONSOLE ==================== -->
+  <!-- DEBUG CONSOLE -->
   <div id="debug-console"></div>
 
   <script>
-    // ==================== DEBUG SYSTEM ====================
+    // DEBUG SYSTEM
     const debugConsole = document.getElementById('debug-console');
     function debugLog(message) {
       const entry = document.createElement('div');
@@ -169,7 +154,7 @@
       console.log(message);
     }
 
-    // ==================== VISIBILITY MANAGEMENT ====================
+    // VISIBILITY MANAGEMENT
     const anchor = document.querySelector('#anchor');
     let visibilityGuardActive = false;
     let visibilityGuardInterval;
@@ -211,7 +196,7 @@
       anchor.addEventListener('targetLost', cleanup, { once: true });
     }
 
-    // ==================== AR SYSTEM INITIALIZATION ====================
+    // AR SYSTEM INITIALIZATION
     const scene = document.querySelector('a-scene');
     if (scene) {
       scene.addEventListener('arReady', () => {
@@ -234,7 +219,7 @@
       });
     }
 
-    // ==================== MAP SYSTEM ====================
+    // MAP SYSTEM
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
@@ -266,7 +251,7 @@
       img.src = url;
     }
 
-    // ==================== GEOLOCATION ====================
+    // GEOLOCATION
     debugLog("Initializing geolocation...");
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -289,7 +274,7 @@
       loadMapTexture(createMapUrl(dormPos));
     }
 
-    // ==================== STARTUP ====================
+    // STARTUP
     window.addEventListener('load', () => {
       debugLog("System ready");
       if (!window.AFRAME) debugLog("❌ A-Frame missing");
