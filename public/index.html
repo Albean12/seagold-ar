@@ -173,16 +173,22 @@
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
     function createSimpleMapUrl() {
+      // Build URL with all required parameters
+      const baseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
       const params = new URLSearchParams({
         center: `${dormPos.lat},${dormPos.lng}`,
         zoom: '17',
         size: '400x300',
         scale: '2',
         maptype: 'roadmap',
-        markers: `color:red|${dormPos.lat},${dormPos.lng}`,
+        markers: `color:0xFF0000|${dormPos.lat},${dormPos.lng}`,
         key: GOOGLE_API_KEY
       });
-      return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
+      
+      // Debug the generated URL
+      const finalUrl = `${baseUrl}?${params.toString()}`;
+      debugLog(`🗺️ Generated Map URL: ${finalUrl.split('?')[0]}`);
+      return finalUrl;
     }
 
     function setMapTexture(url) {
@@ -192,24 +198,50 @@
         return;
       }
 
+      // Create temporary debug image
+      const debugImg = document.createElement('img');
+      debugImg.style.position = 'fixed';
+      debugImg.style.top = '10px';
+      debugImg.style.left = '10px';
+      debugImg.style.width = '200px';
+      debugImg.style.zIndex = '100000';
+      debugImg.style.border = '2px solid red';
+      debugImg.src = url;
+      document.body.appendChild(debugImg);
+      setTimeout(() => document.body.removeChild(debugImg), 10000);
+
       const img = new Image();
       img.crossOrigin = "Anonymous";
       
       const loadTimeout = setTimeout(() => {
         debugLog("⚠️ Map loading timeout, using fallback");
-        mapPlane.setAttribute("material", "shader: flat; src: #mapFallback");
+        mapPlane.setAttribute("material", "shader: standard; src: #mapFallback");
         mapPlane.removeAttribute('data-state');
       }, 5000);
 
       img.onload = function() {
         clearTimeout(loadTimeout);
         try {
-          mapPlane.setAttribute("material", `shader: flat; src: ${url}`);
+          // Verify image data
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          
+          // Check if image has content
+          const pixelData = ctx.getImageData(0, 0, 1, 1).data;
+          if (pixelData[3] === 0) { // If alpha channel is 0 (fully transparent)
+            throw new Error("Received blank image from API");
+          }
+
+          // Apply texture with standard shader for better rendering
+          mapPlane.setAttribute("material", `shader: standard; src: ${url}; metalness: 0; roughness: 1`);
           mapPlane.removeAttribute('data-state');
           debugLog("🗺️ Map texture loaded successfully");
         } catch(e) {
           debugLog(`⚠️ Error applying map texture: ${e.message}`);
-          mapPlane.setAttribute("material", "shader: flat; src: #mapFallback");
+          mapPlane.setAttribute("material", "shader: standard; src: #mapFallback");
           mapPlane.removeAttribute('data-state');
         }
       };
@@ -217,7 +249,7 @@
       img.onerror = function() {
         clearTimeout(loadTimeout);
         debugLog("⚠️ Failed to load map image, using fallback");
-        mapPlane.setAttribute("material", "shader: flat; src: #mapFallback");
+        mapPlane.setAttribute("material", "shader: standard; src: #mapFallback");
         mapPlane.removeAttribute('data-state');
       };
       
@@ -245,8 +277,8 @@
             }
           });
 
-          // Load map
-          const mapUrl = createSimpleMapUrl();
+          // Load map with fresh URL each time
+          const mapUrl = createSimpleMapUrl() + '&' + new Date().getTime(); // Cache busting
           debugLog(`🗺️ Loading map...`);
           setMapTexture(mapUrl);
         });
@@ -259,42 +291,16 @@
       });
     }
 
-    // Geolocation - UPDATED
-    debugLog("Attempting to get geolocation...");
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userPos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          debugLog(`📍 User position obtained: ${JSON.stringify(userPos)}`);
-          const mapUrl = createSimpleMapUrl();
-          setMapTexture(mapUrl);
-        },
-        (err) => {
-          debugLog(`❌ Geolocation error: ${err.message}`);
-          const fallbackUrl = createSimpleMapUrl();
-          setMapTexture(fallbackUrl);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        }
-      );
-    } else {
-      debugLog("❌ Geolocation not supported by browser");
-      const fallbackUrl = createSimpleMapUrl();
-      setMapTexture(fallbackUrl);
-    }
-
     // Initialization
     window.addEventListener('load', () => {
       debugLog("System initialized");
       if (!window.AFRAME || !window.MINDAR) {
         debugLog("❌ Missing required libraries");
       }
+      
+      // Initial map load
+      const mapUrl = createSimpleMapUrl();
+      setMapTexture(mapUrl);
     });
 
     // Global error handling
