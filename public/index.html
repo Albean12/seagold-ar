@@ -8,20 +8,24 @@
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* CRITICAL FIXES ADDED */
+    /* ==================== SCENE LAYERING ==================== */
     a-scene {
-      position: fixed !important;
-      width: 100% !important;
-      height: 100% !important;
-      z-index: 1 !important;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
     }
     
+    /* ==================== VIDEO FEED ==================== */
     body > video.mindar-image-video {
-      z-index: 0 !important;
-      transform: none !important;
+      z-index: 0;
+      transform: none;
+      filter: contrast(1.2) saturate(1.1);
+      -webkit-filter: contrast(1.2) saturate(1.1);
+      image-rendering: crisp-edges;
     }
-
-    /* YOUR EXISTING STYLES */
+    
+    /* ==================== INTERACTIVE ELEMENTS ==================== */
     .clickable {
       cursor: pointer;
       transition: all 0.3s ease;
@@ -29,27 +33,20 @@
     .clickable:hover {
       opacity: 0.8;
     }
-    .dorm-info {
-      font-family: Arial;
-      color: #333;
-      line-height: 1.2;
+    
+    /* ==================== LINK STYLES ==================== */
+    .url-link {
+      color: #0066cc;
+      text-decoration: underline;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    body > video.mindar-image-video {
-      filter: contrast(1.2) saturate(1.1) !important;
-      -webkit-filter: contrast(1.2) saturate(1.1) !important;
-      image-rendering: crisp-edges !important;
+    .url-link:hover {
+      color: #004499;
+      text-decoration: none;
     }
-    .mindar-ui-overlay .scanning::after {
-      content: "";
-      position: absolute;
-      top: 25%;
-      left: 25%;
-      right: 25%;
-      bottom: 25%;
-      border: 2px dashed rgba(255,255,255,0.7);
-      border-radius: 8px;
-      pointer-events: none;
-    }
+    
+    /* ==================== DEBUG CONSOLE ==================== */
     #debug-console {
       position: fixed;
       bottom: 0;
@@ -64,9 +61,23 @@
       overflow-y: auto;
       z-index: 10000;
     }
+    
+    /* ==================== SCANNING UI ==================== */
+    .mindar-ui-overlay .scanning::after {
+      content: "";
+      position: absolute;
+      top: 25%;
+      left: 25%;
+      right: 25%;
+      bottom: 25%;
+      border: 2px dashed rgba(255,255,255,0.7);
+      border-radius: 8px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+  <!-- ==================== AR SCENE CONTAINER ==================== -->
   <a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; 
                         autoStart: true; 
                         uiScanning: true; 
@@ -80,12 +91,15 @@
 
     <a-camera position="0 0 0"></a-camera>
 
+    <!-- ==================== TARGET ANCHOR POINT ==================== -->
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
+      <!-- ==================== BUSINESS CARD ==================== -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" color="#f2ede3"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
                shadow="receive: true">
 
+        <!-- ==================== CARD CONTENT ==================== -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
@@ -115,15 +129,20 @@
                 width="1"
                 color="#333"></a-text>
 
+        <!-- ==================== CLICKABLE WEB URL ==================== -->
         <a-text value="🌐 Seagold Dormitory (Facebook)"
                 position="-0.42 -0.08 0.02"
                 width="1"
-                color="#333"></a-text>
+                color="#0066cc"
+                class="url-link"
+                onclick="window.open('https://facebook.com/seagolddormitory', '_blank')"></a-text>
 
+        <!-- ==================== INTERACTIVE MAP ==================== -->
         <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
                  material="shader: flat"
                  animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true"></a-plane>
 
+        <!-- ==================== CALL TO ACTION ==================== -->
         <a-text value="Visit Our Website"
                 position="0 -0.42 0.02"
                 align="center"
@@ -136,10 +155,11 @@
     </a-entity>
   </a-scene>
 
+  <!-- ==================== DEBUG CONSOLE ==================== -->
   <div id="debug-console"></div>
 
   <script>
-    // Enhanced debug system
+    // ==================== DEBUG SYSTEM ====================
     const debugConsole = document.getElementById('debug-console');
     function debugLog(message) {
       const entry = document.createElement('div');
@@ -149,20 +169,21 @@
       console.log(message);
     }
 
-    // Robust visibility enforcement
+    // ==================== VISIBILITY MANAGEMENT ====================
     const anchor = document.querySelector('#anchor');
-    let visibilityFixActive = false;
+    let visibilityGuardActive = false;
+    let visibilityGuardInterval;
 
-    function enforceVisibility() {
-      if (!anchor || visibilityFixActive) return;
+    function activateVisibilityGuard() {
+      if (!anchor || visibilityGuardActive) return;
       
-      visibilityFixActive = true;
-      debugLog("🔧 Starting visibility enforcement");
+      visibilityGuardActive = true;
+      debugLog("🛡️ Activating visibility guard");
       
-      // Primary enforcement
+      // Primary visibility enforcement
       anchor.setAttribute('visible', 'true');
       
-      // Backup method - add transparent child entity
+      // Backup visibility method
       const backup = document.createElement('a-entity');
       backup.setAttribute('geometry', 'primitive: plane; width: 0.01; height: 0.01');
       backup.setAttribute('material', 'color: transparent; transparent: true; opacity: 0');
@@ -170,38 +191,41 @@
       anchor.appendChild(backup);
       
       // Continuous monitoring
-      const visibilityCheck = setInterval(() => {
+      visibilityGuardInterval = setInterval(() => {
         if (anchor.getAttribute('visible') !== 'true') {
-          debugLog("⚠️ Visibility lost - reapplying fix");
+          debugLog("🛡️ Correcting visibility loss");
           anchor.setAttribute('visible', 'true');
           backup.setAttribute('visible', 'true');
         }
       }, 100);
       
-      // Cleanup when target lost
-      anchor.addEventListener('targetLost', () => {
-        clearInterval(visibilityCheck);
+      // Cleanup handler
+      const cleanup = () => {
+        clearInterval(visibilityGuardInterval);
         anchor.removeChild(backup);
-        visibilityFixActive = false;
-        debugLog("🔧 Visibility enforcement ended");
-      }, { once: true });
+        visibilityGuardActive = false;
+        debugLog("🛡️ Visibility guard deactivated");
+        anchor.removeEventListener('targetLost', cleanup);
+      };
+      
+      anchor.addEventListener('targetLost', cleanup, { once: true });
     }
 
-    // AR Initialization
+    // ==================== AR SYSTEM INITIALIZATION ====================
     const scene = document.querySelector('a-scene');
     if (scene) {
       scene.addEventListener('arReady', () => {
-        debugLog("AR system ready");
+        debugLog("AR system initialized");
         
         if (anchor) {
           anchor.addEventListener('targetFound', () => {
-            debugLog("🎯 Target found");
-            enforceVisibility();
+            debugLog("🎯 Target detected");
+            activateVisibilityGuard();
             
-            // Double-check after rendering cycle
+            // Post-render visibility verification
             requestAnimationFrame(() => {
               if (anchor.getAttribute('visible') !== 'true') {
-                debugLog("🔄 Reconfirming visibility");
+                debugLog("🔄 Visibility verification");
                 anchor.setAttribute('visible', 'true');
               }
             });
@@ -210,43 +234,40 @@
       });
     }
 
-    // Your existing map and geolocation functionality
+    // ==================== MAP SYSTEM ====================
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
-    function createSimpleMapUrl(userPos) {
+    function createMapUrl(userPos) {
       const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=17&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
       
       try {
         return `http://localhost:3001/api/staticmap?userLat=${userPos.lat}&userLng=${userPos.lng}` || fallbackUrl;
       } catch (e) {
-        debugLog(`Map URL generation error: ${e.message}`);
+        debugLog(`Map error: ${e.message}`);
         return fallbackUrl;
       }
     }
 
-    function setMapTexture(url) {
+    function loadMapTexture(url) {
       const mapPlane = document.getElementById("mapPlane");
-      if (!mapPlane) {
-        debugLog("⚠️ Cannot set map texture - mapPlane not found");
-        return;
-      }
+      if (!mapPlane) return;
 
       const img = new Image();
       img.onload = function() {
         mapPlane.setAttribute("material", "shader: flat; src: " + url);
-        debugLog(`Map texture loaded successfully: ${url}`);
+        debugLog(`🗺️ Map loaded: ${url}`);
       };
       img.onerror = function() {
-        debugLog(`⚠️ Failed to load map image from ${url}, using color fallback`);
         mapPlane.setAttribute("color", "#4a954e");
         mapPlane.removeAttribute("material");
+        debugLog("⚠️ Using fallback map color");
       };
       img.src = url;
     }
 
-    // Geolocation
-    debugLog("Attempting to get geolocation...");
+    // ==================== GEOLOCATION ====================
+    debugLog("Initializing geolocation...");
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -254,35 +275,25 @@
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          debugLog(`📍 User position obtained: ${JSON.stringify(userPos)}`);
-          const mapUrl = createSimpleMapUrl(userPos);
-          debugLog(`🗺️ Generated map URL: ${mapUrl}`);
-          setMapTexture(mapUrl);
+          debugLog(`📍 Location: ${userPos.lat}, ${userPos.lng}`);
+          loadMapTexture(createMapUrl(userPos));
         },
         (err) => {
           debugLog(`❌ Geolocation error: ${err.message}`);
-          const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
-          setMapTexture(fallbackUrl);
-          debugLog("Using fallback map image");
+          loadMapTexture(createMapUrl(dormPos));
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        }
+        { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
-      debugLog("❌ Geolocation not supported by browser");
-      const fallbackUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
-      setMapTexture(fallbackUrl);
+      debugLog("❌ Geolocation unavailable");
+      loadMapTexture(createMapUrl(dormPos));
     }
 
-    // Initialization
+    // ==================== STARTUP ====================
     window.addEventListener('load', () => {
-      debugLog("System initialized");
-      if (!window.AFRAME || !window.MINDAR) {
-        debugLog("❌ Missing required libraries");
-      }
+      debugLog("System ready");
+      if (!window.AFRAME) debugLog("❌ A-Frame missing");
+      if (!window.MINDAR) debugLog("❌ MindAR missing");
     });
   </script>
 </body>
