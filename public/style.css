@@ -41,7 +41,7 @@ a-scene {
   overflow: hidden;
 }
 
-/* MINDAR SPECIFIC STYLES */
+/* MINDAR UI ENHANCEMENTS */
 .mindar-ui-overlay {
   pointer-events: none;
 }
@@ -73,11 +73,6 @@ a-scene {
   animation: textFade 3.5s infinite;
 }
 
-.a-entity[mindar-image-target] {
-  transform-style: preserve-3d;
-  backface-visibility: visible !important;
-}
-
 /* ANIMATIONS */
 @keyframes scanPulse {
   0%, 100% { 
@@ -95,37 +90,40 @@ a-scene {
   50% { opacity: 1; }
 }
 
-@keyframes gentlePulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.03); opacity: 0.9; }
-}
-
-@keyframes subtleFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
+/* ENTRANCE ANIMATIONS */
 @keyframes slideFromTop {
-  0% { transform: translateY(-100vh); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% { 
+    transform: translateY(-100vh); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translateY(0); 
+    opacity: 1;
+  }
 }
 
 @keyframes slideFromLeft {
-  0% { transform: translateX(-50vw); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% { 
+    transform: translateX(-50vw); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translateX(0); 
+    opacity: 1;
+  }
 }
 
 @keyframes slideFromRight {
-  0% { transform: translateX(50vw); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% { 
+    transform: translateX(50vw); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translateX(0); 
+    opacity: 1;
+  }
 }
 
-@keyframes mapPulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.03); opacity: 1; }
-}
-
-/* ANIMATION CLASSES */
 .slide-in-top {
   animation: slideFromTop 1.2s ease-out;
   transform-origin: center top;
@@ -141,8 +139,29 @@ a-scene {
   transform-origin: right center;
 }
 
+/* MAP STYLES */
+#mapPlane {
+  transition: transform 0.5s ease-out;
+  mix-blend-mode: multiply;
+}
+
+#mapPlane[data-state="loading"] {
+  background-color: rgba(200, 200, 200, 0.2);
+  animation: gentlePulse 1.5s infinite;
+}
+
 .map-overlay {
   animation: mapPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes gentlePulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes mapPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.03); opacity: 1; }
 }
 
 /* INTERACTIVE ELEMENTS */
@@ -156,20 +175,6 @@ a-scene {
 .clickable:hover {
   opacity: 0.9;
   transform: scale(1.02);
-}
-
-.card-main {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* MAP STYLES */
-#mapPlane {
-  transition: transform 0.5s ease-out;
-  mix-blend-mode: multiply;
-}
-
-#mapPlane:hover {
-  transform: scale(1.03) rotateZ(1deg);
 }
 
 /* DEBUG CONSOLE */
@@ -190,24 +195,25 @@ a-scene {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* SAFETY OVERRIDES */
-.a-entity[visible="false"] {
-  visibility: visible !important;
-  opacity: 1 !important;
+/* PERFORMANCE OPTIMIZATIONS */
+#anchor {
+  will-change: transform, opacity;
+  backface-visibility: visible;
+  transform-style: preserve-3d;
 }
 
-/* TEXT STYLES */
+.a-entity[mindar-image-target] {
+  transform-style: preserve-3d;
+}
+
+/* SAFETY OVERRIDES */
+.a-entity[visible="false"] {
+  display: none !important;
+}
+
+/* TEXT RENDERING */
 .a-text {
   font-family: 'Arial', sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Z-INDEX FIXES */
-body > video.mindar-image-video {
-  z-index: 0 !important;
-}
-
-a-scene {
-  z-index: 1 !important;
 }
