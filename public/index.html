@@ -7,109 +7,46 @@
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
-    /* ==================== SCENE LAYERING ==================== */
-    a-scene {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
+    /* ==================== FONT & TEXT STYLING ==================== */
+    a-text {
+      font-family: 'Poppins', sans-serif !important;
+      font-weight: 700 !important;
+      text-shadow: 
+        1px 1px 2px rgba(0,0,0,0.3),
+        -1px -1px 1px rgba(255,255,255,0.2) !important;
     }
     
-    /* ==================== VIDEO FEED ==================== */
-    body > video.mindar-image-video {
-      z-index: 0;
-      transform: none;
-      filter: contrast(1.2) saturate(1.1);
-      -webkit-filter: contrast(1.2) saturate(1.1);
-      image-rendering: crisp-edges;
+    /* Header Text */
+    .header-text {
+      font-size: 0.12rem !important;
+      letter-spacing: 0.01rem !important;
     }
     
-    /* ==================== INTERACTIVE ELEMENTS ==================== */
-    .clickable {
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .clickable:hover {
-      opacity: 0.8;
+    /* Body Text */
+    .body-text {
+      font-size: 0.07rem !important;
     }
     
-    /* ==================== LINK STYLES ==================== */
-    .url-link {
-      color: #0066cc;
-      text-decoration: underline;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .url-link:hover {
-      color: #004499;
-      text-decoration: none;
+    /* Contact Info */
+    .contact-text {
+      font-size: 0.06rem !important;
     }
     
-    /* ==================== DEBUG CONSOLE ==================== */
-    #debug-console {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 12px;
-      max-height: 150px;
-      overflow-y: auto;
-      z-index: 10000;
-    }
-    
-    /* ==================== SCANNING UI ==================== */
-    .mindar-ui-overlay .scanning::after {
-      content: "";
-      position: absolute;
-      top: 25%;
-      left: 25%;
-      right: 25%;
-      bottom: 25%;
-      border: 2px dashed rgba(255,255,255,0.7);
-      border-radius: 8px;
-      pointer-events: none;
+    /* Call-to-Action */
+    .cta-text {
+      font-size: 0.08rem !important;
     }
 
-    /* ==================== MAP SLIDE ANIMATION ==================== */
+    /* ==================== MAP ANIMATION FIXES ==================== */
     .map-container {
-      position: absolute;
-      right: 0;
-      top: 0;
-      width: 0.6rem;
-      height: 0.4rem;
-      transform: translateX(0.6rem);
-      opacity: 0;
-      transition: all 0.5s ease-out;
-      pointer-events: none;
+      transform: translateX(0.6rem) !important;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
     }
-
+    
     .map-container.visible {
-      transform: translateX(0.7rem);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .map-toggle {
-      position: absolute;
-      right: 0.05rem;
-      bottom: 0.05rem;
-      width: 0.08rem;
-      height: 0.08rem;
-      background: #4a954e;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 5;
-    }
-
-    .map-toggle:hover {
-      transform: scale(1.2);
-      background: #3a853e;
+      transform: translateX(0.7rem) !important;
     }
   </style>
 </head>
@@ -137,7 +74,7 @@
                shadow="receive: true">
 
         <!-- ==================== CARD CONTENT ==================== -->
-        <a-text value="Seagold Dormitory"
+        <a-text class="header-text" value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
                 width="1.2" 
@@ -145,33 +82,32 @@
                 scale="1 1 1"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"></a-text>
 
-        <a-text value="Comfort Away From Home"
+        <a-text class="body-text" value="Comfort Away From Home"
                 position="0 0.28 0.02"
                 align="center"
                 width="1"
                 color="#d2a647"></a-text>
 
-        <a-text value="📞 09225927385"
+        <a-text class="contact-text" value="📞 09225927385"
                 position="-0.42 0.16 0.02"
                 width="1"
                 color="#333"></a-text>
 
-        <a-text value="📧 seagold.service@gmail.com"
+        <a-text class="contact-text" value="📧 seagold.service@gmail.com"
                 position="-0.42 0.08 0.02"
                 width="1"
                 color="#333"></a-text>
 
-        <a-text value="📍 3/F Fern Bldg, Sampaloc, Manila"
+        <a-text class="contact-text" value="📍 3/F Fern Bldg, Sampaloc, Manila"
                 position="-0.42 0.00 0.02"
                 width="1"
                 color="#333"></a-text>
 
         <!-- ==================== CLICKABLE WEB URL ==================== -->
-        <a-text value="🌐 Seagold Dormitory (Facebook)"
+        <a-text class="contact-text url-link" value="🌐 Seagold Dormitory (Facebook)"
                 position="-0.42 -0.08 0.02"
                 width="1"
                 color="#0066cc"
-                class="url-link"
                 onclick="window.open('https://facebook.com/seagolddormitory', '_blank')"></a-text>
 
         <!-- ==================== MAP TOGGLE BUTTON ==================== -->
@@ -182,17 +118,14 @@
         <!-- ==================== SLIDING MAP CONTAINER ==================== -->
         <a-entity class="map-container" position="0.35 -0.2 0.02">
           <a-plane id="mapPlane" width="0.55" height="0.35" color="#ddd" material="shader: flat"></a-plane>
-          <!-- You can add your image here later -->
-          <!-- <a-image src="./assets/images/map-overlay.png" width="0.55" height="0.35"></a-image> -->
         </a-entity>
 
         <!-- ==================== CALL TO ACTION ==================== -->
-        <a-text value="Visit Our Website"
+        <a-text class="cta-text clickable" value="Visit Our Website"
                 position="0 -0.42 0.02"
                 align="center"
                 width="0.8"
                 color="#00bf63"
-                class="clickable"
                 animation="property: scale; to: 1.1 1.1 1; dir: alternate; dur: 1000; loop: true"
                 onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"></a-text>
       </a-plane>
@@ -202,6 +135,7 @@
   <!-- ==================== DEBUG CONSOLE ==================== -->
   <div id="debug-console"></div>
 
+  <!-- Keep all your existing JavaScript exactly as is -->
   <script>
     // ==================== DEBUG SYSTEM ====================
     const debugConsole = document.getElementById('debug-console');
