@@ -6,7 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
+  <!-- Modern font for AR -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Mobile tap targets enhancement */
+    .clickable {
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Debug console styling */
+    #debug-console {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 120px;
+      overflow-y: auto;
+      z-index: 10000;
+    }
+  </style>
 </head>
 <body>
   <a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; 
@@ -22,7 +47,7 @@
 
     <a-assets>
       <canvas id="cardGradient" width="100" height="100"></canvas>
-      <!-- Add your media files here -->
+      <!-- Media assets -->
       <video id="topVideo" src="./assets/media/dorm-tour.mp4" autoplay loop crossorigin="anonymous"></video>
       <img id="leftImage" src="./assets/images/seagold.png" crossorigin="anonymous">
       <img id="rightImage" src="./assets/images/test.png" crossorigin="anonymous">
@@ -39,27 +64,28 @@
 
       <!-- Image slides from left -->
       <a-image src="#leftImage" width="0.6" height="0.4" position="-1.5 0.5 0"
-               animation="property: position; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 300">
+               animation="property: position; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 3000">
       </a-image>
 
       <!-- Image slides from right -->
       <a-image src="#rightImage" width="0.6" height="0.4" position="1.5 0.5 0"
-               animation="property: position; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 300">
+               animation="property: position; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 5000">
       </a-image>
 
-      <!-- Business Card -->
+      <!-- Business Card Container -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" 
                material="shader: flat; src: #cardGradient; transparent: true; opacity: 0.97"
                shadow="receive: true; cast: true"
-               onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic">
 
-        <!-- Title -->
+        <!-- Title with modern font -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
                 width="1.2" 
                 color="#4a954e" 
+                font-family="Poppins"
+                font-weight="700"
                 scale="1 1 1"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear"
                 hover="scale: 1.05 1.05 1">
@@ -71,15 +97,19 @@
                 align="center"
                 width="1"
                 color="#d2a647"
+                font-family="Poppins"
+                font-weight="600"
                 hover="color: #e8c35d">
         </a-text>
 
-        <!-- Contact Info -->
+        <!-- Contact Information -->
         <a-text value="📞 09225927385"
                 position="-0.42 0.16 0.02"
                 width="1"
                 color="#333"
                 class="clickable"
+                font-family="Poppins"
+                font-weight="500"
                 hover="color: #4a954e">
         </a-text>
 
@@ -88,6 +118,8 @@
                 width="1"
                 color="#333"
                 class="clickable"
+                font-family="Poppins"
+                font-weight="500"
                 hover="color: #4a954e">
         </a-text>
 
@@ -96,6 +128,8 @@
                 width="1"
                 color="#333"
                 class="clickable"
+                font-family="Poppins"
+                font-weight="500"
                 hover="color: #4a954e">
         </a-text>
 
@@ -104,28 +138,33 @@
                 width="1"
                 color="#333"
                 class="clickable"
+                font-family="Poppins"
+                font-weight="500"
                 hover="color: #4a954e">
         </a-text>
 
-        <!-- Map -->
+        <!-- Map Display -->
         <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
                  material="shader: flat"
                  animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true">
         </a-plane>
 
-        <!-- CTA Button -->
-        <a-text value="Visit Our Website"
-                position="0 -0.42 0.02"
-                align="center"
-                width="0.8"
-                color="#00bf63"
-                class="clickable"
-                animation="property: scale; to: 1.1 1.1 1; dir: alternate; dur: 1000; loop: true"
-                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
-                hover="scale: 1.15 1.15 1; color: #00ff88; text-shadow: 0 0 10px rgba(0,191,99,0.5)">
-        </a-text>
+        <!-- Enhanced CTA Button with mobile-friendly click area -->
+        <a-entity class="clickable" position="0 -0.42 0.02" onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')">
+          <a-text value="Visit Our Website"
+                  align="center"
+                  width="0.8"
+                  color="#00bf63"
+                  font-family="Poppins"
+                  font-weight="600"
+                  animation="property: scale; to: 1.1 1.1 1; dir: alternate; dur: 1000; loop: true"
+                  hover="scale: 1.15 1.15 1; color: #00ff88; text-shadow: 0 0 10px rgba(0,191,99,0.5)">
+          </a-text>
+          <!-- Invisible clickable plane for better mobile touch -->
+          <a-plane width="0.8" height="0.2" material="opacity: 0; transparent: true"></a-plane>
+        </a-entity>
 
-        <!-- Ambient Particles -->
+        <!-- Decorative Particles -->
         <a-entity id="particles">
           <a-circle radius="0.01" color="#4a954e" position="0.5 0.3 0" 
                    animation="property: position; to: 0.55 0.35 0; dur: 2000; loop: true; dir: alternate"></a-circle>
@@ -139,7 +178,7 @@
   <div id="debug-console"></div>
 
   <script>
-    // Create gradient texture
+    // Gradient Texture Creation
     const canvas = document.getElementById('cardGradient');
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 100, 100);
@@ -148,7 +187,7 @@
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 100, 100);
 
-    // Debug system
+    // Debug System Implementation
     const debugConsole = document.getElementById('debug-console');
     function debugLog(message) {
       const entry = document.createElement('div');
@@ -158,24 +197,65 @@
       console.log(message);
     }
 
-    // Video autoplay handler
-    function handleVideoPlay() {
-      const video = document.querySelector('#topVideo');
-      if (video) {
-        video.play().catch(e => {
-          debugLog(`Video play blocked: ${e.message}`);
-          video.setAttribute('autoplay', 'false');
+    // Mobile Interaction Enhancements
+    function setupMobileInteractions() {
+      const clickables = document.querySelectorAll('.clickable');
+      
+      clickables.forEach(el => {
+        // Touch event handling
+        el.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          this.click();
+        }, { passive: false });
+        
+        // Visual feedback
+        el.addEventListener('touchstart', function() {
+          this.setAttribute('material', 'opacity', '0.9');
         });
-      }
+        el.addEventListener('touchend', function() {
+          this.setAttribute('material', 'opacity', '1');
+        });
+      });
+      
+      debugLog("Mobile interaction handlers initialized");
     }
 
-    // Visibility enforcement
+    // Video Autoplay Management
+    function handleVideoPlayback() {
+      const video = document.querySelector('#topVideo');
+      if (!video) {
+        debugLog("Video element not found");
+        return;
+      }
+      
+      const playAttempt = setInterval(() => {
+        video.play()
+          .then(() => {
+            debugLog("Video playback started");
+            clearInterval(playAttempt);
+          })
+          .catch(e => {
+            debugLog(`Video play attempt failed: ${e.message}`);
+            video.setAttribute('autoplay', 'false');
+          });
+      }, 1000);
+      
+      // Cleanup after 10 seconds if not playing
+      setTimeout(() => {
+        clearInterval(playAttempt);
+      }, 10000);
+    }
+
+    // AR Visibility Enforcement
     const anchor = document.querySelector('#anchor');
     let visibilityFixActive = false;
+    
     function enforceVisibility() {
       if (!anchor || visibilityFixActive) return;
+      
       visibilityFixActive = true;
       debugLog("Starting visibility enforcement");
+      
       anchor.setAttribute('visible', 'true');
       const backup = document.createElement('a-entity');
       backup.setAttribute('visible', 'true');
@@ -183,7 +263,9 @@
       
       const visibilityCheck = setInterval(() => {
         if (anchor.getAttribute('visible') !== 'true') {
+          debugLog("Visibility lost - reapplying");
           anchor.setAttribute('visible', 'true');
+          backup.setAttribute('visible', 'true');
         }
       }, 100);
       
@@ -191,45 +273,63 @@
         clearInterval(visibilityCheck);
         anchor.removeChild(backup);
         visibilityFixActive = false;
+        debugLog("Visibility enforcement ended");
       }, { once: true });
     }
 
-    // AR initialization
+    // AR System Initialization
     const scene = document.querySelector('a-scene');
     if (scene) {
       scene.addEventListener('arReady', () => {
         debugLog("AR system ready");
+        
         if (anchor) {
           anchor.addEventListener('targetFound', () => {
-            debugLog("Target found");
+            debugLog("AR target found");
             enforceVisibility();
-            handleVideoPlay();
+            handleVideoPlayback();
+          });
+          
+          anchor.addEventListener('targetLost', () => {
+            debugLog("AR target lost");
           });
         }
       });
     }
 
-    // Map system
+    // Map System Configuration
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
     function setMapTexture(url) {
       const mapPlane = document.getElementById("mapPlane");
-      if (!mapPlane) return;
+      if (!mapPlane) {
+        debugLog("Map plane element not found");
+        return;
+      }
       
-      const secureUrl = url.startsWith('http:') ? url.replace('http:', 'https:') : url;
+      const secureUrl = url.startsWith('http:') ? 
+        url.replace('http:', 'https:') : url;
+      
       const img = new Image();
       
       img.onload = function() {
         mapPlane.setAttribute("material", `shader: flat; src: ${secureUrl}`);
+        debugLog(`Map texture loaded: ${secureUrl}`);
       };
+      
       img.onerror = function() {
+        debugLog(`Failed to load map texture, using fallback`);
         mapPlane.setAttribute("color", "#4a954e");
+        mapPlane.setAttribute("material", "shader: flat; color: #4a954e");
       };
+      
       img.src = secureUrl;
     }
 
-    function loadMap() {
+    function loadMapWithGeolocation() {
+      debugLog("Starting map loading process");
+      
       const baseUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=16&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
       
       if (navigator.geolocation) {
@@ -239,25 +339,46 @@
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
+            debugLog(`User location obtained: ${userPos.lat}, ${userPos.lng}`);
+            
             const dynamicUrl = `${baseUrl}&markers=color:blue%7C${userPos.lat},${userPos.lng}`;
             setMapTexture(dynamicUrl);
           },
-          () => setMapTexture(baseUrl),
-          { enableHighAccuracy: true, timeout: 5000 }
+          (error) => {
+            debugLog(`Geolocation error: ${error.message}`);
+            setMapTexture(baseUrl);
+          },
+          { 
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          }
         );
       } else {
+        debugLog("Geolocation not supported by browser");
         setMapTexture(baseUrl);
       }
     }
 
-    // Initialize
+    // Main Initialization
     window.addEventListener('load', () => {
-      debugLog("System initialized");
-      if (window.AFRAME && window.MINDAR) {
-        setTimeout(loadMap, 1000);
-      } else {
-        debugLog("Missing required libraries");
+      debugLog("Application initialized");
+      
+      if (!window.AFRAME) {
+        debugLog("Error: A-Frame library not loaded");
+        return;
       }
+      
+      if (!window.MINDAR) {
+        debugLog("Error: MindAR library not loaded");
+        return;
+      }
+      
+      // Initialize systems with delays to prevent race conditions
+      setTimeout(() => {
+        loadMapWithGeolocation();
+        setupMobileInteractions();
+      }, 1000);
     });
   </script>
 </body>
