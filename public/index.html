@@ -5,8 +5,8 @@
   <title>Seagold AR Business Card</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://aframe.io/releases/1.4.0/aframe-animation-component.min.js"></script>
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
+  <!-- Modern font for AR -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <style>
@@ -30,11 +30,6 @@
       max-height: 120px;
       overflow-y: auto;
       z-index: 10000;
-    }
-    /* Animation Fix */
-    a-image[animation] {
-      will-change: transform;
-      backface-visibility: hidden;
     }
   </style>
 </head>
@@ -67,13 +62,14 @@
                material="side: double">
       </a-video>
 
-      <!-- Fixed Image Animations -->
+      <!-- Image slides from left -->
       <a-image src="#leftImage" width="0.6" height="0.4" position="-1.5 0.5 0"
-               animation="property: position; from: -1.5 0.5 0; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 3000; autoplay: false; enabled: false">
+               animation="property: position; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 3000">
       </a-image>
 
+      <!-- Image slides from right -->
       <a-image src="#rightImage" width="0.6" height="0.4" position="1.5 0.5 0"
-               animation="property: position; from: 1.5 0.5 0; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 5000; autoplay: false; enabled: false">
+               animation="property: position; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 5000">
       </a-image>
 
       <!-- Business Card Container -->  
@@ -182,12 +178,6 @@
   <div id="debug-console"></div>
 
   <script>
-    // ADDED ANIMATION COMPONENT CHECK
-    if (!AFRAME.components['animation']) {
-      AFRAME.registerComponent('animation', {});
-      console.log("Animation component manually registered");
-    }
-
     // Gradient Texture Creation
     const canvas = document.getElementById('cardGradient');
     const ctx = canvas.getContext('2d');
@@ -294,21 +284,8 @@
         debugLog("AR system ready");
         
         if (anchor) {
-          // MODIFIED TARGET FOUND HANDLER
           anchor.addEventListener('targetFound', () => {
             debugLog("AR target found");
-            
-            const leftImage = document.querySelector('a-image[src="#leftImage"]');
-            const rightImage = document.querySelector('a-image[src="#rightImage"]');
-            
-            leftImage.setAttribute('position', '-1.5 0.5 0');
-            rightImage.setAttribute('position', '1.5 0.5 0');
-            
-            setTimeout(() => {
-              leftImage.setAttribute('animation', 'enabled', true);
-              rightImage.setAttribute('animation', 'enabled', true);
-            }, 50);
-            
             enforceVisibility();
             handleVideoPlayback();
           });
