@@ -5,6 +5,8 @@
   <title>Seagold AR Business Card</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <!-- ADDED ANIMATION COMPONENT -->
+  <script src="https://aframe.io/releases/1.4.0/aframe-animation-component.min.js"></script>
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <!-- Modern font for AR -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -62,17 +64,18 @@
                material="side: double">
       </a-video>
 
+      <!-- MODIFIED IMAGE ANIMATIONS (LINE 385) -->
       <!-- Image slides from left -->
       <a-image src="#leftImage" width="0.6" height="0.4" position="-1.5 0.5 0"
-               animation="property: position; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 3000">
+               animation="property: position; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 3000; clampWhenFinished: true; autoplay: false">
       </a-image>
 
       <!-- Image slides from right -->
       <a-image src="#rightImage" width="0.6" height="0.4" position="1.5 0.5 0"
-               animation="property: position; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 5000">
+               animation="property: position; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 5000; clampWhenFinished: true; autoplay: false">
       </a-image>
 
-      <!-- Business Card Container -->
+      <!-- Business Card Container -->  
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" 
                material="shader: flat; src: #cardGradient; transparent: true; opacity: 0.97"
                shadow="receive: true; cast: true"
@@ -178,6 +181,12 @@
   <div id="debug-console"></div>
 
   <script>
+    // ADDED ANIMATION COMPONENT CHECK
+    if (!AFRAME.components['animation']) {
+      AFRAME.registerComponent('animation', {});
+      console.log("Animation component manually registered");
+    }
+
     // Gradient Texture Creation
     const canvas = document.getElementById('cardGradient');
     const ctx = canvas.getContext('2d');
