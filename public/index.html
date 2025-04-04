@@ -22,19 +22,39 @@
 
     <a-assets>
       <canvas id="cardGradient" width="100" height="100"></canvas>
+      <!-- Add your media files here -->
+      <video id="topVideo" src="./assets/media/dorm-tour.mp4" autoplay loop crossorigin="anonymous"></video>
+      <img id="leftImage" src="./assets/images/facility.jpg" crossorigin="anonymous">
+      <img id="rightImage" src="./assets/images/location.jpg" crossorigin="anonymous">
     </a-assets>
 
     <a-camera position="0 0 0"></a-camera>
 
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- Enhanced Card -->
+      <!-- Video slides down from top -->
+      <a-video src="#topVideo" width="0.8" height="0.45" position="0 1.5 0"
+               animation="property: position; to: 0 0.8 0; dur: 1500; startEvents: targetFound; easing: easeOutElastic"
+               material="side: double">
+      </a-video>
+
+      <!-- Image slides from left -->
+      <a-image src="#leftImage" width="0.6" height="0.4" position="-1.5 0.5 0"
+               animation="property: position; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 300">
+      </a-image>
+
+      <!-- Image slides from right -->
+      <a-image src="#rightImage" width="0.6" height="0.4" position="1.5 0.5 0"
+               animation="property: position; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 300">
+      </a-image>
+
+      <!-- Business Card -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" 
                material="shader: flat; src: #cardGradient; transparent: true; opacity: 0.97"
                shadow="receive: true; cast: true"
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic">
 
-        <!-- Title with smooth rotation -->
+        <!-- Title -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
@@ -54,7 +74,7 @@
                 hover="color: #e8c35d">
         </a-text>
 
-        <!-- Interactive Contact Info -->
+        <!-- Contact Info -->
         <a-text value="📞 09225927385"
                 position="-0.42 0.16 0.02"
                 width="1"
@@ -87,13 +107,13 @@
                 hover="color: #4a954e">
         </a-text>
 
-        <!-- Map Placeholder -->
+        <!-- Map -->
         <a-plane id="mapPlane" position="0.35 -0.25 0.04" width="0.5" height="0.3" color="#ddd"
                  material="shader: flat"
                  animation="property: rotation; to: 0 0 10; dur: 2000; dir: alternate; loop: true">
         </a-plane>
 
-        <!-- Enhanced CTA Button -->
+        <!-- CTA Button -->
         <a-text value="Visit Our Website"
                 position="0 -0.42 0.02"
                 align="center"
@@ -138,31 +158,39 @@
       console.log(message);
     }
 
+    // Video autoplay handler
+    function handleVideoPlay() {
+      const video = document.querySelector('#topVideo');
+      if (video) {
+        video.play().catch(e => {
+          debugLog(`Video play blocked: ${e.message}`);
+          video.setAttribute('autoplay', 'false');
+        });
+      }
+    }
+
     // Visibility enforcement
     const anchor = document.querySelector('#anchor');
     let visibilityFixActive = false;
     function enforceVisibility() {
       if (!anchor || visibilityFixActive) return;
       visibilityFixActive = true;
-      debugLog("🔧 Starting visibility enforcement");
+      debugLog("Starting visibility enforcement");
       anchor.setAttribute('visible', 'true');
       const backup = document.createElement('a-entity');
-      backup.setAttribute('geometry', 'primitive: plane; width: 0.01; height: 0.01');
-      backup.setAttribute('material', 'color: transparent; transparent: true; opacity: 0');
       backup.setAttribute('visible', 'true');
       anchor.appendChild(backup);
+      
       const visibilityCheck = setInterval(() => {
         if (anchor.getAttribute('visible') !== 'true') {
-          debugLog("⚠️ Visibility lost - reapplying fix");
           anchor.setAttribute('visible', 'true');
-          backup.setAttribute('visible', 'true');
         }
       }, 100);
+      
       anchor.addEventListener('targetLost', () => {
         clearInterval(visibilityCheck);
         anchor.removeChild(backup);
         visibilityFixActive = false;
-        debugLog("🔧 Visibility enforcement ended");
       }, { once: true });
     }
 
@@ -173,50 +201,37 @@
         debugLog("AR system ready");
         if (anchor) {
           anchor.addEventListener('targetFound', () => {
-            debugLog("🎯 Target found");
+            debugLog("Target found");
             enforceVisibility();
-            requestAnimationFrame(() => {
-              if (anchor.getAttribute('visible') !== 'true') {
-                debugLog("🔄 Reconfirming visibility");
-                anchor.setAttribute('visible', 'true');
-              }
-            });
+            handleVideoPlay();
           });
         }
       });
     }
 
-    // FIXED MAP SYSTEM ==============================================
+    // Map system
     const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
     const dormPos = { lat: 14.603919, lng: 120.987760 };
 
     function setMapTexture(url) {
       const mapPlane = document.getElementById("mapPlane");
-      if (!mapPlane) {
-        debugLog("⚠️ Cannot set map texture - mapPlane not found");
-        return;
-      }
+      if (!mapPlane) return;
       
-      // Force HTTPS if needed
       const secureUrl = url.startsWith('http:') ? url.replace('http:', 'https:') : url;
-      
       const img = new Image();
+      
       img.onload = function() {
         mapPlane.setAttribute("material", `shader: flat; src: ${secureUrl}`);
-        debugLog(`🗺️ Map texture loaded: ${secureUrl}`);
       };
       img.onerror = function() {
-        debugLog(`⚠️ Failed to load map, using solid color`);
         mapPlane.setAttribute("color", "#4a954e");
       };
       img.src = secureUrl;
     }
 
     function loadMap() {
-      debugLog("🌍 Starting map load...");
-      const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=16&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
+      const baseUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=16&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
       
-      // First try with user position if available
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -224,32 +239,24 @@
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
-            debugLog(`📍 User location: ${userPos.lat}, ${userPos.lng}`);
-            
-            // Create map with user position marker
-            const dynamicUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=15&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&markers=color:blue%7C${userPos.lat},${userPos.lng}&key=${GOOGLE_API_KEY}`;
+            const dynamicUrl = `${baseUrl}&markers=color:blue%7C${userPos.lat},${userPos.lng}`;
             setMapTexture(dynamicUrl);
           },
-          (err) => {
-            debugLog(`❌ Geolocation error: ${err.message}`);
-            setMapTexture(mapUrl); // Fallback to static map
-          },
+          () => setMapTexture(baseUrl),
           { enableHighAccuracy: true, timeout: 5000 }
         );
       } else {
-        debugLog("🌍 Geolocation not available, using static map");
-        setMapTexture(mapUrl);
+        setMapTexture(baseUrl);
       }
     }
 
-    // Initialize everything
+    // Initialize
     window.addEventListener('load', () => {
       debugLog("System initialized");
-      if (!window.AFRAME || !window.MINDAR) {
-        debugLog("❌ Missing required libraries");
-      } else {
-        // Load map after slight delay to ensure AR is ready
+      if (window.AFRAME && window.MINDAR) {
         setTimeout(loadMap, 1000);
+      } else {
+        debugLog("Missing required libraries");
       }
     });
   </script>
