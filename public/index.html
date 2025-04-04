@@ -6,36 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <style>
     /* CRITICAL FIXES */
-    a-scene {
-      position: fixed !important;
-      width: 100% !important;
-      height: 100% !important;
-      z-index: 1 !important;
-    }
-    
-    body > video.mindar-image-video {
-      z-index: 0 !important;
-      transform: none !important;
-    }
 
-    /* ENHANCED STYLES */
-    .clickable {
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .clickable:hover {
-      opacity: 0.9;
-      transform: scale(1.02);
-    }
-    body > video.mindar-image-video {
-      filter: contrast(1.2) saturate(1.1) brightness(0.95) !important;
-    }
-    #debug-console {
-      background: rgba(0,0,0,0.85);
-      border-top: 1px solid rgba(255,255,255,0.1);
+
+    /* FONT STYLES */
+    .poppins-text {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -53,11 +33,30 @@
 
     <a-assets>
       <canvas id="cardGradient" width="100" height="100"></canvas>
+      <!-- Sample images for sliding effect - replace with your actual image URLs -->
+      <img id="slide1" src="https://via.placeholder.com/300x200/4a954e/ffffff?text=Dorm+Room" crossorigin="anonymous">
+      <img id="slide2" src="https://via.placeholder.com/300x200/d2a647/ffffff?text=Facilities" crossorigin="anonymous">
+      <img id="slide3" src="https://via.placeholder.com/300x200/00bf63/ffffff?text=Location" crossorigin="anonymous">
     </a-assets>
 
     <a-camera position="0 0 0"></a-camera>
 
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
+      <!-- Sliding Images (Top) -->
+      <a-image src="#slide1" position="0 1.2 0" width="0.8" height="0.5"
+               animation="property: position; to: 0 0.7 0; dur: 1500; startEvents: targetFound; easing: easeOutElastic">
+      </a-image>
+
+      <!-- Sliding Images (Left) -->
+      <a-image src="#slide2" position="-1.5 0.5 0" width="0.6" height="0.4"
+               animation="property: position; to: -0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 300">
+      </a-image>
+
+      <!-- Sliding Images (Right) -->
+      <a-image src="#slide3" position="1.5 0.5 0" width="0.6" height="0.4"
+               animation="property: position; to: 0.6 0.5 0; dur: 1800; startEvents: targetFound; easing: easeOutBack; delay: 300">
+      </a-image>
+
       <!-- Enhanced Card -->
       <a-plane class="clickable" position="0 0 0" width="1" height="0.9" 
                material="shader: flat; src: #cardGradient; transparent: true; opacity: 0.97"
@@ -65,13 +64,13 @@
                onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic">
 
-        <!-- Title with smooth rotation -->
+        <!-- Title with Poppins font -->
         <a-text value="Seagold Dormitory"
                 position="0 0.35 0.02" 
                 align="center" 
                 width="1.2" 
                 color="#4a954e" 
-                scale="1 1 1"
+                class="poppins-text"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear"
                 hover="scale: 1.05 1.05 1">
         </a-text>
@@ -82,6 +81,7 @@
                 align="center"
                 width="1"
                 color="#d2a647"
+                class="poppins-text"
                 hover="color: #e8c35d">
         </a-text>
 
@@ -90,7 +90,7 @@
                 position="-0.42 0.16 0.02"
                 width="1"
                 color="#333"
-                class="clickable"
+                class="clickable poppins-text"
                 hover="color: #4a954e">
         </a-text>
 
@@ -98,7 +98,7 @@
                 position="-0.42 0.08 0.02"
                 width="1"
                 color="#333"
-                class="clickable"
+                class="clickable poppins-text"
                 hover="color: #4a954e">
         </a-text>
 
@@ -106,7 +106,7 @@
                 position="-0.42 0.00 0.02"
                 width="1"
                 color="#333"
-                class="clickable"
+                class="clickable poppins-text"
                 hover="color: #4a954e">
         </a-text>
 
@@ -114,7 +114,7 @@
                 position="-0.42 -0.08 0.02"
                 width="1"
                 color="#333"
-                class="clickable"
+                class="clickable poppins-text"
                 hover="color: #4a954e">
         </a-text>
 
@@ -130,7 +130,7 @@
                 align="center"
                 width="0.8"
                 color="#00bf63"
-                class="clickable"
+                class="clickable poppins-text"
                 animation="property: scale; to: 1.1 1.1 1; dir: alternate; dur: 1000; loop: true"
                 onclick="window.open('https://seagold-dormitory.vercel.app', '_blank')"
                 hover="scale: 1.15 1.15 1; color: #00ff88; text-shadow: 0 0 10px rgba(0,191,99,0.5)">
