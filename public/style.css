@@ -1,5 +1,5 @@
- /* CRITICAL FIXES */
- a-scene {
+/* CRITICAL FIXES */
+a-scene {
   position: fixed !important;
   width: 100% !important;
   height: 100% !important;
@@ -136,20 +136,14 @@ a-scene {
   transform: scale(1.02);
 }
 
+/* MAP VISUALIZATION */
 #mapPlane {
-  margin-top: 0.2rem;
-  transition: transform 0.3s ease;
+  transition: transform 0.5s ease-out;
 }
 
-/* Enhance the floating map visually on hover */
 #mapPlane:hover {
-  filter: drop-shadow(0 0 5px rgba(0, 191, 99, 0.4));
-  transform: scale(1.02);
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transform: scale(1.03) rotateZ(1deg);
 }
-
-
-
 
 /* DEBUG CONSOLE */
 #debug-console {
@@ -186,19 +180,20 @@ a-scene {
   opacity: 1 !important;
 }
 
-/* Ensure animated elements are smoothly reset on targetLost */
-/* Slide-out animation optimization */
-#topVideoEntity,
-#leftImageEntity,
-#rightImageEntity {
-  will-change: transform, position;
-  transition: transform 0.4s ease-out, position 0.4s ease-out;
+/* ✅ CLICKABLE FIXES FOR AR BUTTON */
+.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
-/* Improve mapPlane stacking in AR if needed */
-a-plane#mapPlane {
-  z-index: 2; /* ensure it's rendered on top */
+#visitPlane:hover {
+  filter: brightness(1.1) saturate(1.1);
+  transform: scale(1.04);
+  transition: filter 0.3s ease, transform 0.3s ease;
 }
-a-plane#mapPlane[material] {
-  opacity: 1 !important; /* fallback if JS-controlled fade doesn't apply */
+
+#visitButton {
+  z-index: 3;
 }
