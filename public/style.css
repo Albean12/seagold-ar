@@ -136,14 +136,20 @@ a-scene {
   transform: scale(1.02);
 }
 
-/* MAP VISUALIZATION */
 #mapPlane {
-  transition: transform 0.5s ease-out;
+  margin-top: 0.2rem;
+  transition: transform 0.3s ease;
 }
 
+/* Enhance the floating map visually on hover */
 #mapPlane:hover {
-  transform: scale(1.03) rotateZ(1deg);
+  filter: drop-shadow(0 0 5px rgba(0, 191, 99, 0.4));
+  transform: scale(1.02);
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
+
+
+
 
 /* DEBUG CONSOLE */
 #debug-console {
@@ -178,4 +184,21 @@ a-scene {
 .a-entity[visible="false"] {
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+/* Ensure animated elements are smoothly reset on targetLost */
+/* Slide-out animation optimization */
+#topVideoEntity,
+#leftImageEntity,
+#rightImageEntity {
+  will-change: transform, position;
+  transition: transform 0.4s ease-out, position 0.4s ease-out;
+}
+
+/* Improve mapPlane stacking in AR if needed */
+a-plane#mapPlane {
+  z-index: 2; /* ensure it's rendered on top */
+}
+a-plane#mapPlane[material] {
+  opacity: 1 !important; /* fallback if JS-controlled fade doesn't apply */
 }
