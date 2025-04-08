@@ -54,11 +54,16 @@
            renderer="colorManagement: true, physicallyCorrectLights"
            device-orientation-permission-ui="enabled: true">
     <a-assets>
-      <canvas id="cardGradient" width="100" height="100"></canvas>
+      <img id="cardFront" src="./assets/images/ARCARD.png" crossorigin="anonymous">
+      <img id="cardBack" src="./assets/images/targets-target.png" crossorigin="anonymous">
       <video id="topVideo" src="./assets/images/promo.mp4" loop crossorigin="anonymous"></video>
       <img id="leftImage" src="./assets/images/seagold.png" crossorigin="anonymous">
       <img id="rightImage" src="./assets/images/test.png" crossorigin="anonymous">
     </a-assets>
+
+    <!-- Add lighting for 3D effect -->
+    <a-entity light="type: ambient; color: #cccccc; intensity: 0.5"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.8" position="-1 1 1"></a-entity>
 
     <!-- Camera -->
     <a-camera position="0 0 0" raycaster="objects: .clickable" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
@@ -81,64 +86,53 @@
                animation__slideout="property: position; to: 1.5 0.5 0; dur: 1800; easing: easeOutBack; startEvents: startSlideOut; delay: 500">
       </a-image>
 
-      <!-- Business card content -->
-      <a-plane class="clickable" position="0 0 0" width="1" height="0.9"
-               material="shader: flat; src: #cardGradient; transparent: true; opacity: 0.97"
-               shadow="receive: true; cast: true"
-               animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic">
-
-        <!-- Title & Tagline -->
-        <a-text value="Seagold Dormitory" position="0 0.35 0.02" align="center" width="1.2"
-                color="#4a954e" font-family="Poppins" font-weight="700"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear">
-        </a-text>
-        <a-text value="Comfort Away From Home" position="0 0.28 0.02" align="center" width="1"
-                color="#d2a647" font-family="Poppins" font-weight="600"></a-text>
-
-        <!-- Contact Info -->
-        <a-text value="📞 09225927385" position="-0.42 0.16 0.02" width="1" color="#333" font-family="Poppins" font-weight="500"></a-text>
-        <a-text value="📧 seagold.service@gmail.com" position="-0.42 0.08 0.02" width="1" color="#333" font-family="Poppins" font-weight="500"></a-text>
-        <a-text value="📍 3/F Fern Bldg, Sampaloc, Manila" position="-0.42 0.00 0.02" width="1" color="#333" font-family="Poppins" font-weight="500"></a-text>
-        <a-text value="🌐 Seagold Dormitory (Facebook)" position="-0.42 -0.08 0.02" width="1" color="#333" font-family="Poppins" font-weight="500"></a-text>
-
-        <!-- ✅ Visit Website Button (mousedown supported) -->
-        <a-plane id="visitPlane" class="clickable" position="0 -0.38 0.02"
-                 width="0.6" height="0.15" color="#00bf63"
-                 material="shader: flat; transparent: false; opacity: 0.95"
-                 animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
-          <a-text value="VISIT OUR WEBSITE" align="center" width="0.8" color="#ffffff"
-                  font-family="Poppins" font-weight="600" position="0 0 0.01">
-          </a-text>
-        </a-plane>
-
-        <!-- Map Plane -->
-        <a-plane id="mapPlane" position="0 -1.2 0.04" width="0.5" height="0.3" opacity="0"
-                 material="shader: flat"
-                 animation__in="property: position; to: 0 -0.75 0.04; dur: 1200; easing: easeOutCubic; startEvents: startMapAnim"
-                 animation__fade="property: material.opacity; to: 1; dur: 800; easing: easeInOutQuad; startEvents: startMapAnim"
-                 animation__float="property: position; dir: alternate; dur: 3000; loop: true; to: 0 -0.72 0.04; easing: easeInOutSine">
-        </a-plane>
-
-        <!-- Decorative Particles -->
-        <a-entity id="particles">
-          <a-circle radius="0.01" color="#4a954e" position="0.5 0.3 0"
-                    animation="property: position; to: 0.55 0.35 0; dur: 2000; loop: true; dir: alternate"></a-circle>
-          <a-circle radius="0.008" color="#d2a647" position="-0.4 -0.2 0"
-                    animation="property: position; to: -0.45 -0.25 0; dur: 2500; loop: true; dir: alternate"></a-circle>
+      <!-- 3D Business Card Content -->
+      <a-entity id="3dCard" position="0 0 0"
+                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
+                animation__rotate="property: rotation; to: 0 360 0; dur: 10000; loop: true; easing: linear; startEvents: startRotation">
+        
+        <!-- 3D Box with front and back images -->
+        <a-entity geometry="primitive: box; width: 1.2; height: 0.7; depth: 0.05"
+                  material="src: #cardFront; side: front; roughness: 0.2">
+          <a-material src="#cardBack" side="back"></a-material>
+          <a-material color="#f5f5f5" side="left"></a-material>
+          <a-material color="#f5f5f5" side="right"></a-material>
+          <a-material color="#f5f5f5" side="top"></a-material>
+          <a-material color="#f5f5f5" side="bottom"></a-material>
         </a-entity>
+
+        <!-- Front face content (raised slightly) -->
+        <a-entity position="0 0 0.026">
+
+          <!-- Visit Website Button -->
+          <a-plane id="visitPlane" class="clickable" position="0 -0.25 0.02"
+                   width="0.7" height="0.12" color="#00bf63"
+                   material="shader: standard; transparent: false; opacity: 0.95"
+                   animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
+            <a-text value="VISIT OUR WEBSITE" align="center" width="0.9" color="#ffffff"
+                    font-family="Poppins" font-weight="600" position="0 0 0.01">
+            </a-text>
+          </a-plane>
+        </a-entity>
+      </a-entity>
+
+      <!-- Map Plane -->
+      <a-plane id="mapPlane" position="0 -1.0 0.04" width="0.6" height="0.35" opacity="0"
+               material="shader: flat"
+               animation__in="property: position; to: 0 -0.6 0.04; dur: 1200; easing: easeOutCubic; startEvents: startMapAnim"
+               animation__fade="property: material.opacity; to: 1; dur: 800; easing: easeInOutQuad; startEvents: startMapAnim">
       </a-plane>
+
+      <!-- Decorative Particles -->
+      <a-entity id="particles">
+        <a-circle radius="0.012" color="#4a954e" position="0.6 0.35 0"
+                  animation="property: position; to: 0.65 0.4 0; dur: 2000; loop: true; dir: alternate"></a-circle>
+        <a-circle radius="0.01" color="#d2a647" position="-0.5 -0.25 0"
+                  animation="property: position; to: -0.55 -0.3 0; dur: 2500; loop: true; dir: alternate"></a-circle>
+      </a-entity>
     </a-entity>
     <div id="debug-console"></div>
     <script>
-      // 🌈 Generate card gradient
-      const canvas = document.getElementById('cardGradient');
-      const ctx = canvas.getContext('2d');
-      const gradient = ctx.createLinearGradient(0, 0, 100, 100);
-      gradient.addColorStop(0, '#f2ede3');
-      gradient.addColorStop(1, '#e8e0d0');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 100, 100);
-    
       const debugConsole = document.getElementById('debug-console');
       function debugLog(msg) {
         const entry = document.createElement('div');
@@ -148,13 +142,13 @@
         console.log(msg);
       }
     
-      // 🌐 VISIT WEBSITE - Use mousedown for AR compatibility
+      // 🌐 VISIT WEBSITE
       function setupVisitButton() {
         const visitPlane = document.getElementById('visitPlane');
         if (visitPlane) {
           visitPlane.addEventListener('mousedown', () => {
             debugLog("Opening website (mousedown)...");
-            window.location.href = 'https://seagold-dormitory.vercel.app';
+            window.open('https://seagold-dormitory.vercel.app', '_blank');
           });
         }
       }
@@ -171,7 +165,7 @@
         debugLog("Touch compatibility initialized.");
       }
     
-      // 🎥 Auto-play video fix: Play only when AR is triggered
+      // 🎥 Auto-play video fix
       function handleVideoPlayback() {
         const video = document.querySelector('#topVideo');
         if (!video) return;
@@ -264,7 +258,7 @@
     
       // 🚀 Start everything
       window.addEventListener('load', () => {
-        debugLog("App loaded.");
+        debugLog("App loaded with 3D card implementation");
         setupVisitButton();
         setupMobileInteractions();
         loadMapWithGeolocation();
@@ -275,23 +269,25 @@
           scene.addEventListener('arReady', () => {
             debugLog("AR system ready");
             anchor.addEventListener('targetFound', () => {
-              debugLog("Marker detected");
+              debugLog("Marker detected - starting animations");
               document.querySelector('#topVideoEntity').emit('startSlideOut');
               document.querySelector('#leftImageEntity').emit('startSlideOut');
               document.querySelector('#rightImageEntity').emit('startSlideOut');
               document.querySelector('#mapPlane').emit('startMapAnim');
+              document.querySelector('#3dCard').emit('startRotation');
     
               enforceVisibility();
               handleVideoPlayback();
             });
     
             anchor.addEventListener('targetLost', () => {
-              debugLog("Marker lost");
+              debugLog("Marker lost - resetting positions");
               document.querySelector('#topVideoEntity').setAttribute('position', '0 0.8 0');
               document.querySelector('#leftImageEntity').setAttribute('position', '-0.6 0.5 0');
               document.querySelector('#rightImageEntity').setAttribute('position', '0.6 0.5 0');
-              document.querySelector('#mapPlane').setAttribute('position', '0 -1.2 0.04');
+              document.querySelector('#mapPlane').setAttribute('position', '0 -1.0 0.04');
               document.querySelector('#mapPlane').setAttribute('material', 'shader: flat; opacity: 0');
+              document.querySelector('#3dCard').setAttribute('rotation', '0 0 0');
     
               // Pause video when marker is lost
               const video = document.querySelector('#topVideo');
@@ -304,7 +300,5 @@
         }
       });
     </script>
-    </script>
   </body>
 </html>
-    
