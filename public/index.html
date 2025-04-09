@@ -8,131 +8,99 @@
   <script src="./assets/mindar/mindar-image-aframe.prod.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .clickable {
-      cursor: pointer;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #debug-console {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 12px;
-      max-height: 120px;
-      overflow-y: auto;
-      z-index: 10000;
-    }
-
-    #fallback-button {
-      position: fixed;
-      bottom: 140px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #00bf63;
-      color: white;
-      font-family: Poppins, sans-serif;
-      font-weight: 600;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      z-index: 9999;
-      font-size: 16px;
-    }
-  </style>
+  <link rel="stylesheet" href="loading.css" />
 </head>
 <body>
+  <div id="ar-loader">
+    <div class="loader-container">
+      <img src="./assets/images/seagold-logo.png" class="loader-logo" alt="Seagold Dormitory">
+      <div class="loader-spinner">
+        <div class="loader-spinner-inner"></div>
+        <div class="loader-spinner-inner"></div>
+        <div class="loader-spinner-inner"></div>
+      </div>
+      <h3 class="loader-text">Seagold AR Experience</h3>
+      <p class="loader-subtext">Initializing augmented reality for your business dormitory card</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
   <a-scene mindar-image="imageTargetSrc: ./assets/targets.mind; autoStart: true; uiScanning: true; wasmPath: ./assets/mindar/; filterMinCF: 0.01; filterBeta: 0.001;"
            cursor="rayOrigin: mouse"
            embedded color-space="sRGB"
            renderer="colorManagement: true, physicallyCorrectLights"
            device-orientation-permission-ui="enabled: true">
     <a-assets>
-      <img id="cardFront" src="./assets/images/ARCARD.png" crossorigin="anonymous">
-      <img id="cardBack" src="./assets/images/targets-target.png" crossorigin="anonymous">
-      <video id="topVideo" src="./assets/images/promo.mp4" loop crossorigin="anonymous"></video>
+      <canvas id="cardGradient" width="100" height="100"></canvas>
+      <video id="topVideo" src="./assets/images/promo.mp4" loop crossorigin="anonymous" muted playsinline></video>
       <img id="leftImage" src="./assets/images/seagold.png" crossorigin="anonymous">
       <img id="rightImage" src="./assets/images/test.png" crossorigin="anonymous">
+      <img id="cardFront" src="./assets/images/ARCARD.png" crossorigin="anonymous">
+      <img id="cardBack" src="./assets/images/targets-target.png" crossorigin="anonymous">
     </a-assets>
 
-    <!-- Add lighting for 3D effect -->
-    <a-entity light="type: ambient; color: #cccccc; intensity: 0.5"></a-entity>
-    <a-entity light="type: directional; color: #ffffff; intensity: 0.8" position="-1 1 1"></a-entity>
-
-    <!-- Camera -->
     <a-camera position="0 0 0" raycaster="objects: .clickable" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
 
-    <!-- Anchor for marker -->
     <a-entity id="anchor" mindar-image-target="targetIndex: 0">
-      <!-- Slide-out video -->
       <a-video id="topVideoEntity" src="#topVideo" width="0.8" height="0.45" position="0 0.8 0"
                animation__slideout="property: position; to: 0 1.2 0; dur: 1500; easing: easeOutCubic; startEvents: startSlideOut"
                material="side: double">
       </a-video>
 
-      <!-- Left image -->
       <a-image id="leftImageEntity" src="#leftImage" width="0.6" height="0.4" position="-0.6 0.5 0"
                animation__slideout="property: position; to: -1.5 0.5 0; dur: 1800; easing: easeOutBack; startEvents: startSlideOut; delay: 300">
       </a-image>
 
-      <!-- Right image -->
       <a-image id="rightImageEntity" src="#rightImage" width="0.6" height="0.4" position="0.6 0.5 0"
                animation__slideout="property: position; to: 1.5 0.5 0; dur: 1800; easing: easeOutBack; startEvents: startSlideOut; delay: 500">
       </a-image>
 
-      <!-- 3D Business Card Content -->
-      <a-entity id="3dCard" position="0 0 0"
-                animation="property: position; to: 0 0.05 0; dur: 800; easing: easeOutElastic"
-                animation__rotate="property: rotation; to: 0 360 0; dur: 10000; loop: true; easing: linear; startEvents: startRotation">
-        
-        <!-- 3D Box with front and back images -->
-        <a-entity geometry="primitive: box; width: 1.2; height: 0.7; depth: 0.05"
-                  material="src: #cardFront; side: front; roughness: 0.2">
-          <a-material src="#cardBack" side="back"></a-material>
-          <a-material color="#f5f5f5" side="left"></a-material>
-          <a-material color="#f5f5f5" side="right"></a-material>
-          <a-material color="#f5f5f5" side="top"></a-material>
-          <a-material color="#f5f5f5" side="bottom"></a-material>
-        </a-entity>
+      <a-box id="cardBox" class="clickable" position="0 0 0" depth="0.03" height="0.7" width="1.1"
+             material="src: #cardFront; side: front">
+        <a-material src="#cardBack" side="back"></a-material>
+        <a-material color="#f2ede3" side="left"></a-material>
+        <a-material color="#f2ede3" side="right"></a-material>
+        <a-material color="#f2ede3" side="top"></a-material>
+        <a-material color="#f2ede3" side="bottom"></a-material>
+      </a-box>
 
-        <!-- Front face content (raised slightly) -->
-        <a-entity position="0 0 0.026">
-
-          <!-- Visit Website Button -->
-          <a-plane id="visitPlane" class="clickable" position="0 -0.25 0.02"
-                   width="0.7" height="0.12" color="#00bf63"
-                   material="shader: standard; transparent: false; opacity: 0.95"
-                   animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
-            <a-text value="VISIT OUR WEBSITE" align="center" width="0.9" color="#ffffff"
-                    font-family="Poppins" font-weight="600" position="0 0 0.01">
-            </a-text>
-          </a-plane>
-        </a-entity>
-      </a-entity>
-
-      <!-- Map Plane -->
-      <a-plane id="mapPlane" position="0 -1.0 0.04" width="0.6" height="0.35" opacity="0"
-               material="shader: flat"
-               animation__in="property: position; to: 0 -0.6 0.04; dur: 1200; easing: easeOutCubic; startEvents: startMapAnim"
-               animation__fade="property: material.opacity; to: 1; dur: 800; easing: easeInOutQuad; startEvents: startMapAnim">
+      <a-plane id="visitPlane" class="clickable" position="0 -0.45 0.02"
+               width="0.6" height="0.15" color="#00bf63"
+               material="shader: flat; transparent: false; opacity: 0.95"
+               animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
+        <a-text value="VISIT OUR WEBSITE" align="center" width="0.8" color="#ffffff"
+                font-family="Poppins" font-weight="600" position="0 0 0.01">
+        </a-text>
       </a-plane>
 
-      <!-- Decorative Particles -->
+      <a-plane id="mapPlane" position="0 -1.2 0.04" width="0.5" height="0.3" opacity="0"
+               material="shader: flat"
+               animation__in="property: position; to: 0 -0.75 0.04; dur: 1200; easing: easeOutCubic; startEvents: startMapAnim"
+               animation__fade="property: material.opacity; to: 1; dur: 800; easing: easeInOutQuad; startEvents: startMapAnim"
+               animation__float="property: position; dir: alternate; dur: 3000; loop: true; to: 0 -0.72 0.04; easing: easeInOutSine">
+      </a-plane>
+
       <a-entity id="particles">
-        <a-circle radius="0.012" color="#4a954e" position="0.6 0.35 0"
-                  animation="property: position; to: 0.65 0.4 0; dur: 2000; loop: true; dir: alternate"></a-circle>
-        <a-circle radius="0.01" color="#d2a647" position="-0.5 -0.25 0"
-                  animation="property: position; to: -0.55 -0.3 0; dur: 2500; loop: true; dir: alternate"></a-circle>
+        <a-circle radius="0.01" color="#4a954e" position="0.5 0.3 0"
+                  animation="property: position; to: 0.55 0.35 0; dur: 2000; loop: true; dir: alternate"></a-circle>
+        <a-circle radius="0.008" color="#d2a647" position="-0.4 -0.2 0"
+                  animation="property: position; to: -0.45 -0.25 0; dur: 2500; loop: true; dir: alternate"></a-circle>
       </a-entity>
     </a-entity>
+
     <div id="debug-console"></div>
+
     <script>
+      const canvas = document.getElementById('cardGradient');
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+      gradient.addColorStop(0, '#f2ede3');
+      gradient.addColorStop(1, '#e8e0d0');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 100, 100);
+
       const debugConsole = document.getElementById('debug-console');
       function debugLog(msg) {
         const entry = document.createElement('div');
@@ -141,19 +109,17 @@
         debugConsole.scrollTop = debugConsole.scrollHeight;
         console.log(msg);
       }
-    
-      // 🌐 VISIT WEBSITE
+
       function setupVisitButton() {
         const visitPlane = document.getElementById('visitPlane');
         if (visitPlane) {
           visitPlane.addEventListener('mousedown', () => {
-            debugLog("Opening website (mousedown)...");
-            window.open('https://seagold-dormitory.vercel.app', '_blank');
+            debugLog("Opening website...");
+            window.location.href = 'https://seagold-dormitory.vercel.app';
           });
         }
       }
-    
-      // 📱 Mobile Touch Compatibility
+
       function setupMobileInteractions() {
         const clickables = document.querySelectorAll('.clickable');
         clickables.forEach(el => {
@@ -164,79 +130,66 @@
         });
         debugLog("Touch compatibility initialized.");
       }
-    
-      // 🎥 Auto-play video fix
+
       function handleVideoPlayback() {
         const video = document.querySelector('#topVideo');
         if (!video) return;
         const tryPlay = setInterval(() => {
           if (video.paused && video.readyState >= 3) {
-            video.play()
-              .then(() => {
-                debugLog("Video playing");
-                clearInterval(tryPlay);
-              })
-              .catch(e => {
-                debugLog("Video play error: " + e.message);
-              });
+            video.play().then(() => {
+              debugLog("Video playing");
+              clearInterval(tryPlay);
+            }).catch(e => {
+              debugLog("Video play error: " + e.message);
+            });
           }
         }, 1000);
         setTimeout(() => clearInterval(tryPlay), 10000);
       }
-    
-      // 🔁 Marker tracking logic
+
       function enforceVisibility() {
         const anchor = document.getElementById('anchor');
         if (!anchor || anchor.__fixing) return;
         anchor.__fixing = true;
         anchor.setAttribute('visible', 'true');
-    
         const backup = document.createElement('a-entity');
         backup.setAttribute('visible', 'true');
         anchor.appendChild(backup);
-    
         const check = setInterval(() => {
           if (anchor.getAttribute('visible') !== 'true') {
             anchor.setAttribute('visible', 'true');
             backup.setAttribute('visible', 'true');
           }
         }, 100);
-    
         anchor.addEventListener('targetLost', () => {
           clearInterval(check);
           anchor.removeChild(backup);
           anchor.__fixing = false;
         }, { once: true });
       }
-    
-      // 🗺️ MAP SYSTEM
+
       const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
       const dormPos = { lat: 14.603919, lng: 120.987760 };
-    
+
       function setMapTexture(url) {
         const mapPlane = document.getElementById("mapPlane");
         if (!mapPlane) return;
-    
         const secureUrl = url.startsWith('http:') ? url.replace('http:', 'https:') : url;
         const img = new Image();
-    
         img.onload = () => {
           mapPlane.setAttribute("material", `shader: flat; src: ${secureUrl}; opacity: 0`);
           debugLog(`Map texture loaded`);
         };
-    
         img.onerror = () => {
           mapPlane.setAttribute("material", "shader: flat; color: #4a954e; opacity: 0");
           debugLog("Map load failed.");
         };
-    
         img.src = secureUrl;
       }
-    
+
       function loadMapWithGeolocation() {
         debugLog("Fetching map...");
         const base = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=16&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
-    
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             pos => {
@@ -255,41 +208,74 @@
           setMapTexture(base);
         }
       }
-    
-      // 🚀 Start everything
+
+      let isFlipped = false;
+      document.addEventListener('DOMContentLoaded', () => {
+        const card = document.querySelector('#cardBox');
+        card.addEventListener('mousedown', () => {
+          isFlipped = !isFlipped;
+          const newRotation = isFlipped ? '0 180 0' : '0 0 0';
+          card.setAttribute('animation__flip', {
+            property: 'rotation',
+            to: newRotation,
+            dur: 800,
+            easing: 'easeInOutCubic',
+          });
+          debugLog("Card flipped to: " + newRotation);
+        });
+      });
+
+      function simulateLoading() {
+        const progressFill = document.getElementById('progress-fill');
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            setTimeout(() => {
+              document.getElementById('ar-loader').style.opacity = 0;
+              setTimeout(() => {
+                document.getElementById('ar-loader').style.display = 'none';
+              }, 500);
+            }, 300);
+          }
+          progressFill.style.width = `${progress}%`;
+        }, 300);
+      }
+
       window.addEventListener('load', () => {
-        debugLog("App loaded with 3D card implementation");
+        debugLog("App loaded.");
+        simulateLoading();
         setupVisitButton();
         setupMobileInteractions();
         loadMapWithGeolocation();
-    
+
         const anchor = document.getElementById('anchor');
         const scene = document.querySelector('a-scene');
         if (scene && anchor) {
           scene.addEventListener('arReady', () => {
             debugLog("AR system ready");
             anchor.addEventListener('targetFound', () => {
-              debugLog("Marker detected - starting animations");
+              debugLog("Marker detected");
               document.querySelector('#topVideoEntity').emit('startSlideOut');
               document.querySelector('#leftImageEntity').emit('startSlideOut');
               document.querySelector('#rightImageEntity').emit('startSlideOut');
               document.querySelector('#mapPlane').emit('startMapAnim');
-              document.querySelector('#3dCard').emit('startRotation');
-    
+              document.querySelector('#cardBox').emit('startRotation');
               enforceVisibility();
               handleVideoPlayback();
             });
-    
+
             anchor.addEventListener('targetLost', () => {
-              debugLog("Marker lost - resetting positions");
+              debugLog("Marker lost");
               document.querySelector('#topVideoEntity').setAttribute('position', '0 0.8 0');
               document.querySelector('#leftImageEntity').setAttribute('position', '-0.6 0.5 0');
               document.querySelector('#rightImageEntity').setAttribute('position', '0.6 0.5 0');
-              document.querySelector('#mapPlane').setAttribute('position', '0 -1.0 0.04');
+              document.querySelector('#mapPlane').setAttribute('position', '0 -1.2 0.04');
               document.querySelector('#mapPlane').setAttribute('material', 'shader: flat; opacity: 0');
-              document.querySelector('#3dCard').setAttribute('rotation', '0 0 0');
-    
-              // Pause video when marker is lost
+              document.querySelector('#cardBox').setAttribute('rotation', '0 0 0');
+
               const video = document.querySelector('#topVideo');
               if (video) {
                 video.pause();
@@ -300,5 +286,6 @@
         }
       });
     </script>
-  </body>
+  </a-scene>
+</body>
 </html>
