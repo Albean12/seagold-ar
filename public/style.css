@@ -55,14 +55,8 @@ body > video.mindar-image-video {
 }
 
 @keyframes scanPulse {
-  0%, 100% { 
-    opacity: 0.6;
-    transform: scale(0.95);
-  }
-  50% { 
-    opacity: 0.9;
-    transform: scale(1.05);
-  }
+  0%, 100% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 0.9; transform: scale(1.05); }
 }
 
 .mindar-ui-overlay::after {
@@ -88,13 +82,30 @@ body > video.mindar-image-video {
 }
 
 .clickable:hover {
-  opacity: 0.9;
-  transform: scale(1.02);
+  opacity: 0.95;
+  transform: scale(1.05);
+}
+
+/* Visit button animation */
+#visitPlane {
+  animation: glowPulse 1.8s ease-in-out infinite alternate;
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 #visitPlane:hover {
   filter: brightness(1.1) saturate(1.1);
   transform: scale(1.04);
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 4px rgba(0, 191, 99, 0.5);
+    filter: brightness(1);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(0, 191, 99, 0.9);
+    filter: brightness(1.15);
+  }
 }
 
 /* ============ MAP STYLES ============ */
@@ -252,3 +263,54 @@ body > video.mindar-image-video {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+/* ============ RESPONSIVE MOBILE TWEAKS ============ */
+@media screen and (max-width: 768px) {
+  a-scene {
+    transform: scale(0.9);
+    transform-origin: center center;
+  }
+
+  #visitPlane {
+    width: 0.5 !important;
+    height: 0.12 !important;
+  }
+
+  #mapPlane {
+    width: 0.45 !important;
+    height: 0.27 !important;
+  }
+
+  .loader-container {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .loader-text {
+    font-size: 16px;
+  }
+
+  .loader-subtext {
+    font-size: 13px;
+  }
+
+  #debug-console {
+    font-size: 12px;
+  }
+}
+/* ============ ENTITY GLOW ANIMATIONS ============ */
+.glow-pulse {
+  animation: elementGlow 2.5s ease-in-out infinite alternate;
+  will-change: filter, transform;
+}
+
+@keyframes elementGlow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+    transform: scale(1);
+  }
+  100% {
+    filter: drop-shadow(0 0 12px rgba(255,255,255,0.75));
+    transform: scale(1.02);
+  }
+}
+
