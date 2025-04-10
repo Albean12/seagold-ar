@@ -1,316 +1,316 @@
-  /* ============ CRITICAL FIXES ============ */
+/* ============ CRITICAL FIXES ============ */
+a-scene {
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1 !important;
+}
+
+body > video.mindar-image-video {
+  z-index: 0 !important;
+  transform: none !important;
+}
+
+/* ============ BASE STYLES ============ */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ============ VIDEO FEED LAYER ============ */
+body > video.mindar-image-video {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  filter: contrast(1.2) saturate(1.1) brightness(0.9) !important;
+  -webkit-filter: contrast(1.2) saturate(1.1) brightness(0.9) !important;
+  image-rendering: crisp-edges;
+}
+
+/* ============ SCANNING UI ENHANCEMENTS ============ */
+.mindar-ui-overlay {
+  pointer-events: none;
+}
+
+.mindar-ui-overlay::before {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  right: 20%;
+  bottom: 20%;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  animation: scanPulse 2.5s infinite ease-in-out;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes scanPulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 0.9; transform: scale(1.05); }
+}
+
+.mindar-ui-overlay::after {
+  content: "Align marker within frame";
+  position: absolute;
+  bottom: 22%;
+  left: 0;
+  right: 0;
+  color: white;
+  text-align: center;
+  font-size: 1.1em;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  animation: textFade 3.5s infinite;
+}
+
+/* ============ INTERACTIVE ELEMENTS ============ */
+.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.clickable:hover {
+  opacity: 0.95;
+  transform: scale(1.05);
+}
+
+/* Visit button animation */
+#visitPlane {
+  animation: glowPulse 1.8s ease-in-out infinite alternate;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+#visitPlane:hover {
+  filter: brightness(1.1) saturate(1.1);
+  transform: scale(1.04);
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 4px rgba(0, 191, 99, 0.5);
+    filter: brightness(1);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(0, 191, 99, 0.9);
+    filter: brightness(1.15);
+  }
+}
+
+/* ============ MAP STYLES ============ */
+#mapPlane {
+  transition: transform 0.5s ease-out;
+}
+
+#mapPlane:hover {
+  transform: scale(1.03) rotateZ(1deg);
+}
+
+/* ============ DEBUG CONSOLE ============ */
+#debug-console {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: #f0f0f0;
+  padding: 8px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  max-height: 120px;
+  overflow-y: auto;
+  z-index: 10000;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes textFade {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 0.9; }
+}
+
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* ============ SAFETY OVERRIDES ============ */
+.a-entity[visible="false"] {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ============ LOADING SCREEN ============ */
+#ar-loader {
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f8f5f0;
+  z-index: 99999;
+  font-family: 'Poppins', sans-serif;
+  transition: opacity 0.5s ease;
+}
+
+.loader-container {
+  text-align: center;
+  max-width: 300px;
+  padding: 30px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.loader-logo {
+  width: 80px;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.loader-spinner {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.loader-spinner-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-top-color: #00bf63;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loader-spinner-inner:nth-child(2) {
+  border-top-color: #d2a647;
+  animation-delay: 0.2s;
+}
+
+.loader-spinner-inner:nth-child(3) {
+  border-top-color: #4a954e;
+  animation-delay: 0.4s;
+}
+
+.loader-text {
+  margin: 12px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.3s forwards;
+}
+
+.loader-subtext {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.6s forwards;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #eee;
+  border-radius: 2px;
+  margin-top: 20px;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.9s forwards;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00bf63, #d2a647);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ============ LOADING ANIMATIONS ============ */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* ============ RESPONSIVE MOBILE TWEAKS ============ */
+@media screen and (max-width: 768px) {
   a-scene {
-    position: fixed !important;
-    width: 100% !important;
-    height: 100% !important;
-    z-index: 1 !important;
+    transform: scale(0.9);
+    transform-origin: center center;
   }
 
-  body > video.mindar-image-video {
-    z-index: 0 !important;
-    transform: none !important;
-  }
-
-  /* ============ BASE STYLES ============ */
-  body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-    font-family: 'Poppins', sans-serif;
-  }
-
-  /* ============ VIDEO FEED LAYER ============ */
-  body > video.mindar-image-video {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    z-index: 0 !important;
-    pointer-events: none !important;
-    filter: contrast(1.2) saturate(1.1) brightness(0.9) !important;
-    -webkit-filter: contrast(1.2) saturate(1.1) brightness(0.9) !important;
-    image-rendering: crisp-edges;
-  }
-
-  /* ============ SCANNING UI ENHANCEMENTS ============ */
-  .mindar-ui-overlay {
-    pointer-events: none;
-  }
-
-  .mindar-ui-overlay::before {
-    content: "";
-    position: absolute;
-    top: 20%;
-    left: 20%;
-    right: 20%;
-    bottom: 20%;
-    border: 2px dashed rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
-    animation: scanPulse 2.5s infinite ease-in-out;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  }
-
-  @keyframes scanPulse {
-    0%, 100% { opacity: 0.6; transform: scale(0.95); }
-    50% { opacity: 0.9; transform: scale(1.05); }
-  }
-
-  .mindar-ui-overlay::after {
-    content: "Align marker within frame";
-    position: absolute;
-    bottom: 22%;
-    left: 0;
-    right: 0;
-    color: white;
-    text-align: center;
-    font-size: 1.1em;
-    font-weight: 500;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    animation: textFade 3.5s infinite;
-  }
-
-  /* ============ INTERACTIVE ELEMENTS ============ */
-  .clickable {
-    cursor: pointer;
-    transition: all 0.3s ease;
-    pointer-events: auto;
-    touch-action: manipulation;
-  }
-
-  .clickable:hover {
-    opacity: 0.95;
-    transform: scale(1.05);
-  }
-
-  /* Visit button animation */
   #visitPlane {
-    animation: glowPulse 1.8s ease-in-out infinite alternate;
-    transition: transform 0.3s ease, filter 0.3s ease;
+    width: 0.5 !important;
+    height: 0.12 !important;
   }
 
-  #visitPlane:hover {
-    filter: brightness(1.1) saturate(1.1);
-    transform: scale(1.04);
-  }
-
-  @keyframes glowPulse {
-    0% {
-      box-shadow: 0 0 4px rgba(0, 191, 99, 0.5);
-      filter: brightness(1);
-    }
-    100% {
-      box-shadow: 0 0 12px rgba(0, 191, 99, 0.9);
-      filter: brightness(1.15);
-    }
-  }
-
-  /* ============ MAP STYLES ============ */
   #mapPlane {
-    transition: transform 0.5s ease-out;
-  }
-
-  #mapPlane:hover {
-    transform: scale(1.03) rotateZ(1deg);
-  }
-
-  /* ============ DEBUG CONSOLE ============ */
-  #debug-console {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.85);
-    color: #f0f0f0;
-    padding: 8px 12px;
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-    line-height: 1.4;
-    max-height: 120px;
-    overflow-y: auto;
-    z-index: 10000;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  /* ============ ANIMATIONS ============ */
-  @keyframes textFade {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-  }
-
-  @keyframes gentlePulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.03); opacity: 0.9; }
-  }
-
-  @keyframes subtleFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
-  }
-
-  /* ============ SAFETY OVERRIDES ============ */
-  .a-entity[visible="false"] {
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  /* ============ LOADING SCREEN ============ */
-  #ar-loader {
-    position: fixed;
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: #f8f5f0;
-    z-index: 99999;
-    font-family: 'Poppins', sans-serif;
-    transition: opacity 0.5s ease;
+    width: 0.45 !important;
+    height: 0.27 !important;
   }
 
   .loader-container {
-    text-align: center;
-    max-width: 300px;
-    padding: 30px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  }
-
-  .loader-logo {
-    width: 80px;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out forwards;
-  }
-
-  .loader-spinner {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 20px;
-    position: relative;
-  }
-
-  .loader-spinner-inner {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border: 3px solid transparent;
-    border-top-color: #00bf63;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .loader-spinner-inner:nth-child(2) {
-    border-top-color: #d2a647;
-    animation-delay: 0.2s;
-  }
-
-  .loader-spinner-inner:nth-child(3) {
-    border-top-color: #4a954e;
-    animation-delay: 0.4s;
+    max-width: 90%;
+    padding: 20px;
   }
 
   .loader-text {
-    margin: 12px 0 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out 0.3s forwards;
+    font-size: 16px;
   }
 
   .loader-subtext {
-    margin-top: 8px;
-    font-size: 14px;
-    color: #666;
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out 0.6s forwards;
+    font-size: 13px;
   }
 
-  .progress-bar {
-    width: 100%;
-    height: 4px;
-    background: #eee;
-    border-radius: 2px;
-    margin-top: 20px;
-    overflow: hidden;
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out 0.9s forwards;
+  #debug-console {
+    font-size: 12px;
   }
+}
+/* ============ ENTITY GLOW ANIMATIONS ============ */
+.glow-pulse {
+  animation: elementGlow 2.5s ease-in-out infinite alternate;
+  will-change: filter, transform;
+}
 
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #00bf63, #d2a647);
-    border-radius: 2px;
-    transition: width 0.3s ease;
+@keyframes elementGlow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+    transform: scale(1);
   }
-
-  /* ============ LOADING ANIMATIONS ============ */
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  100% {
+    filter: drop-shadow(0 0 12px rgba(255,255,255,0.75));
+    transform: scale(1.02);
   }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  /* ============ RESPONSIVE MOBILE TWEAKS ============ */
-  @media screen and (max-width: 768px) {
-    a-scene {
-      transform: scale(0.9);
-      transform-origin: center center;
-    }
-
-    #visitPlane {
-      width: 0.5 !important;
-      height: 0.12 !important;
-    }
-
-    #mapPlane {
-      width: 0.45 !important;
-      height: 0.27 !important;
-    }
-
-    .loader-container {
-      max-width: 90%;
-      padding: 20px;
-    }
-
-    .loader-text {
-      font-size: 16px;
-    }
-
-    .loader-subtext {
-      font-size: 13px;
-    }
-
-    #debug-console {
-      font-size: 12px;
-    }
-  }
-  /* ============ ENTITY GLOW ANIMATIONS ============ */
-  .glow-pulse {
-    animation: elementGlow 2.5s ease-in-out infinite alternate;
-    will-change: filter, transform;
-  }
-
-  @keyframes elementGlow {
-    0% {
-      filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
-      transform: scale(1);
-    }
-    100% {
-      filter: drop-shadow(0 0 12px rgba(255,255,255,0.75));
-      transform: scale(1.02);
-    }
-  }
+}
 
