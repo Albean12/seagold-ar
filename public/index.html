@@ -116,6 +116,10 @@
 
       const debugConsole = document.getElementById('debug-console');
       function debugLog(msg) {
+        if (!debugConsole) return;
+        if (debugConsole.children.length > 50) {
+          debugConsole.removeChild(debugConsole.firstChild);
+        }
         const entry = document.createElement('div');
         entry.textContent = `[DEBUG ${new Date().toLocaleTimeString()}]: ${msg}`;
         debugConsole.appendChild(entry);
@@ -165,17 +169,18 @@
       function handleVideoPlayback() {
         const video = document.querySelector('#topVideo');
         if (!video) return;
-        const tryPlay = setInterval(() => {
+        const tryPlay = () => {
           if (video.paused && video.readyState >= 3) {
             video.play().then(() => {
               debugLog("Video playing");
-              clearInterval(tryPlay);
             }).catch(e => {
               debugLog("Video play error: " + e.message);
+              setTimeout(tryPlay, 1000);
             });
           }
-        }, 1000);
-        setTimeout(() => clearInterval(tryPlay), 10000);
+        };
+        tryPlay();
+        setTimeout(() => {}, 10000);
       }
 
       function enforceVisibility() {
@@ -199,6 +204,7 @@
         }, { once: true });
       }
 
+      // PRESERVED ORIGINAL GOOGLE MAPS IMPLEMENTATION
       const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
       const dormPos = { lat: 14.603919, lng: 120.987760 };
 
@@ -240,21 +246,24 @@
         }
       }
 
-      let isFlipped = false;
-      document.addEventListener('DOMContentLoaded', () => {
+      function setupCardFlip() {
         const card = document.querySelector('#cardBox');
+        if (!card) return;
+        
+        let isFlipped = false;
         card.addEventListener('mousedown', () => {
           isFlipped = !isFlipped;
           const newRotation = isFlipped ? '0 180 0' : '0 0 0';
           card.setAttribute('animation__flip', {
             property: 'rotation',
             to: newRotation,
-            dur: 800,
-            easing: 'easeInOutCubic',
+            dur: 1000,
+            easing: 'easeOutElastic',
+            elasticity: 400
           });
           debugLog("Card flipped to: " + newRotation);
         });
-      });
+      }
 
       function simulateLoading() {
         const progressFill = document.getElementById('progress-fill');
@@ -282,6 +291,7 @@
         setupMobileInteractions();
         loadMapWithGeolocation();
         scaleForSmallScreens();
+        setupCardFlip();
 
         const scene = document.querySelector('a-scene');
         scene.addEventListener('mousemove', (e) => {
@@ -320,7 +330,6 @@
               document.querySelector('#leftImageEntity').emit('startSlideOut');
               document.querySelector('#rightImageEntity').emit('startSlideOut');
               document.querySelector('#mapPlane').emit('startMapAnim');
-              document.querySelector('#cardBox').emit('startRotation');
               enforceVisibility();
               handleVideoPlayback();
             });
@@ -333,6 +342,7 @@
               document.querySelector('#mapPlane').setAttribute('position', '0 -1.2 0.04');
               document.querySelector('#mapPlane').setAttribute('material', 'shader: standard; opacity: 0');
               document.querySelector('#cardBox').setAttribute('rotation', '0 0 0');
+              document.querySelector('#cardBox').removeAttribute('animation__flip');
 
               const video = document.querySelector('#topVideo');
               if (video) {
