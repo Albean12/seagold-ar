@@ -90,8 +90,8 @@
                width="0.6" height="0.15" color="#00bf63"
                material="shader: flat; transparent: false; opacity: 0.95"
                animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
-        <a-text value="VISIT OUR WEBSITE" align="center" width="0.8" color="#ffffff"
-                font-family="Poppins" font-weight="600" position="0 0 0.01">
+        <a-text class="clickable" value="VISIT OUR WEBSITE" align="center" width="0.8" color="#ffffff"
+                font-family="Poppins" font-weight="600" position="0 0 0.02">
         </a-text>
       </a-plane>
 
@@ -143,6 +143,7 @@
         if (visitPlane) {
           visitPlane.addEventListener('mousedown', () => {
             debugLog("Visit button clicked. Redirecting to website...");
+
             fetch('https://seagold-dormitory.vercel.app/api/log-visit', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -152,11 +153,16 @@
                 source: 'seagold-ar-business-card'
               })
             }).catch(err => debugLog('Analytics log failed: ' + err.message));
-            window.location.href = 'https://seagold-dormitory.vercel.app';
+
+            const link = document.createElement('a');
+            link.href = 'https://seagold-dormitory.vercel.app';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
           });
         }
       }
-
       function scaleForSmallScreens() {
         const anchor = document.getElementById('anchor');
         if (window.innerWidth < 500 && anchor) {
@@ -212,6 +218,7 @@
           anchor.__fixing = false;
         }, { once: true });
       }
+
       const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
       const dormPos = { lat: 14.603919, lng: 120.987760 };
 
@@ -337,17 +344,15 @@
             anchor.addEventListener('targetLost', () => {
               debugLog("Marker lost. Resetting AR elements...");
 
-              const rightEl = document.querySelector('#rightImageEntity');
-              rightEl.setAttribute('visible', 'false');
-              rightEl.setAttribute('position', '0 0.2 0.01');
-
-              const leftEl = document.querySelector('#leftImageEntity');
-              leftEl.setAttribute('visible', 'false');
-              leftEl.setAttribute('position', '0 0.2 0.01');
-
-              const videoEl = document.querySelector('#topVideoEntity');
-              videoEl.setAttribute('visible', 'false');
-              videoEl.setAttribute('position', '0 0.2 0.01');
+              const resetPosition = '0 0.2 0.01';
+              const entities = ['#rightImageEntity', '#leftImageEntity', '#topVideoEntity', '#mapPlane'];
+              entities.forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el) {
+                  el.setAttribute('visible', 'false');
+                  el.setAttribute('position', resetPosition);
+                }
+              });
 
               const rawVideo = document.querySelector('#topVideo');
               if (rawVideo) {
@@ -356,9 +361,9 @@
               }
 
               const mapEl = document.querySelector('#mapPlane');
-              mapEl.setAttribute('visible', 'false');
-              mapEl.setAttribute('position', '0 0.2 0.01');
-              mapEl.setAttribute('material', 'shader: standard; opacity: 0');
+              if (mapEl) {
+                mapEl.setAttribute('material', 'shader: standard; opacity: 0');
+              }
 
               const card = document.querySelector('#cardBox');
               if (card) {
