@@ -12,7 +12,7 @@
 <body>
   <div id="ar-loader">
     <div class="loader-container">
-      <img src="./assets/images/seagold-logo.png" class="loader-logo" alt="Seagold Dormitory">
+      <img src="./assets/images/seagoldpinicon.png" class="loader-logo" alt="Seagold Dormitory">
       <div class="loader-spinner">
         <div class="loader-spinner-inner"></div>
         <div class="loader-spinner-inner"></div>
@@ -106,16 +106,21 @@
 
     <div id="debug-console"></div>
     <script>
+      // Initialize canvas gradient
       const canvas = document.getElementById('cardGradient');
-      const ctx = canvas.getContext('2d');
-      const gradient = ctx.createLinearGradient(0, 0, 100, 100);
-      gradient.addColorStop(0, '#f2ede3');
-      gradient.addColorStop(1, '#e8e0d0');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 100, 100);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+        gradient.addColorStop(0, '#f2ede3');
+        gradient.addColorStop(1, '#e8e0d0');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 100, 100);
+      }
 
+      // Debug console setup
       const debugConsole = document.getElementById('debug-console');
       function debugLog(msg) {
+        if (!debugConsole) return;
         const entry = document.createElement('div');
         entry.textContent = `[DEBUG ${new Date().toLocaleTimeString()}]: ${msg}`;
         debugConsole.appendChild(entry);
@@ -123,6 +128,7 @@
         console.log(msg);
       }
 
+      // Core functions with error handling
       function setupVisitButton() {
         const visitPlane = document.getElementById('visitPlane');
         if (visitPlane) {
@@ -165,33 +171,41 @@
       function handleVideoPlayback() {
         const video = document.querySelector('#topVideo');
         if (!video) return;
-        const tryPlay = setInterval(() => {
+        
+        const tryPlay = () => {
           if (video.paused && video.readyState >= 3) {
             video.play().then(() => {
               debugLog("Video playing");
-              clearInterval(tryPlay);
             }).catch(e => {
               debugLog("Video play error: " + e.message);
+              setTimeout(tryPlay, 1000);
             });
+          } else {
+            setTimeout(tryPlay, 1000);
           }
-        }, 1000);
-        setTimeout(() => clearInterval(tryPlay), 10000);
+        };
+        
+        tryPlay();
+        setTimeout(() => {}, 10000); // Clear any pending timeouts
       }
 
       function enforceVisibility() {
         const anchor = document.getElementById('anchor');
         if (!anchor || anchor.__fixing) return;
+        
         anchor.__fixing = true;
         anchor.setAttribute('visible', 'true');
         const backup = document.createElement('a-entity');
         backup.setAttribute('visible', 'true');
         anchor.appendChild(backup);
+        
         const check = setInterval(() => {
           if (anchor.getAttribute('visible') !== 'true') {
             anchor.setAttribute('visible', 'true');
             backup.setAttribute('visible', 'true');
           }
         }, 100);
+        
         anchor.addEventListener('targetLost', () => {
           clearInterval(check);
           anchor.removeChild(backup);
@@ -199,28 +213,38 @@
         }, { once: true });
       }
 
+      // Map functions with improved error handling
       const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
       const dormPos = { lat: 14.603919, lng: 120.987760 };
 
       function setMapTexture(url) {
         const mapPlane = document.getElementById("mapPlane");
         if (!mapPlane) return;
-        const secureUrl = url.startsWith('http:') ? url.replace('http:', 'https:') : url;
-        const img = new Image();
-        img.onload = () => {
-          mapPlane.setAttribute("material", `shader: standard; src: ${secureUrl}; opacity: 0; metalness: 0.2; roughness: 0.6`);
-          debugLog(`Map texture loaded`);
-        };
-        img.onerror = () => {
-          mapPlane.setAttribute("material", "shader: standard; color: #4a954e; opacity: 0");
-          debugLog("Map load failed.");
-        };
-        img.src = secureUrl;
+        
+        try {
+          const secureUrl = url.startsWith('http:') ? url.replace('http:', 'https:') : url;
+          const img = new Image();
+          
+          img.onload = () => {
+            mapPlane.setAttribute("material", `shader: standard; src: ${secureUrl}; opacity: 0; metalness: 0.2; roughness: 0.6`);
+            debugLog(`Map texture loaded`);
+          };
+          
+          img.onerror = () => {
+            mapPlane.setAttribute("material", "shader: standard; color: #4a954e; opacity: 0");
+            debugLog("Map load failed.");
+          };
+          
+          img.src = secureUrl;
+        } catch (e) {
+          debugLog("Error setting map texture: " + e.message);
+        }
       }
 
       function loadMapWithGeolocation() {
         debugLog("Fetching map...");
         const base = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=16&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
+        
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             pos => {
@@ -240,24 +264,32 @@
         }
       }
 
-      let isFlipped = false;
-      document.addEventListener('DOMContentLoaded', () => {
+      // Card flip functionality
+      function setupCardFlip() {
         const card = document.querySelector('#cardBox');
+        if (!card) return;
+        
+        let isFlipped = false;
         card.addEventListener('mousedown', () => {
           isFlipped = !isFlipped;
           const newRotation = isFlipped ? '0 180 0' : '0 0 0';
+          
           card.setAttribute('animation__flip', {
             property: 'rotation',
             to: newRotation,
             dur: 800,
             easing: 'easeInOutCubic',
           });
+          
           debugLog("Card flipped to: " + newRotation);
         });
-      });
+      }
 
+      // Loading simulation
       function simulateLoading() {
         const progressFill = document.getElementById('progress-fill');
+        if (!progressFill) return;
+        
         let progress = 0;
         const interval = setInterval(() => {
           progress += Math.random() * 10;
@@ -265,25 +297,24 @@
             progress = 100;
             clearInterval(interval);
             setTimeout(() => {
-              document.getElementById('ar-loader').style.opacity = 0;
-              setTimeout(() => {
-                document.getElementById('ar-loader').style.display = 'none';
-              }, 500);
+              const loader = document.getElementById('ar-loader');
+              if (loader) {
+                loader.style.opacity = 0;
+                setTimeout(() => {
+                  loader.style.display = 'none';
+                }, 500);
+              }
             }, 300);
           }
           progressFill.style.width = `${progress}%`;
         }, 300);
       }
 
-      window.addEventListener('load', () => {
-        debugLog("App loaded.");
-        simulateLoading();
-        setupVisitButton();
-        setupMobileInteractions();
-        loadMapWithGeolocation();
-        scaleForSmallScreens();
-
+      // Scene setup with proper initialization
+      function setupScene() {
         const scene = document.querySelector('a-scene');
+        if (!scene) return;
+        
         scene.addEventListener('mousemove', (e) => {
           const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
           const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -311,29 +342,45 @@
         });
 
         const anchor = document.getElementById('anchor');
-        if (scene && anchor) {
+        if (anchor) {
           scene.addEventListener('arReady', () => {
             debugLog("AR system ready");
+            
             anchor.addEventListener('targetFound', () => {
               debugLog("Marker detected");
-              document.querySelector('#topVideoEntity').emit('startSlideOut');
-              document.querySelector('#leftImageEntity').emit('startSlideOut');
-              document.querySelector('#rightImageEntity').emit('startSlideOut');
-              document.querySelector('#mapPlane').emit('startMapAnim');
-              document.querySelector('#cardBox').emit('startRotation');
+              
+              // Trigger animations safely
+              ['#topVideoEntity', '#leftImageEntity', '#rightImageEntity', '#mapPlane', '#cardBox'].forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el) el.emit('startSlideOut');
+              });
+              
               enforceVisibility();
               handleVideoPlayback();
             });
 
             anchor.addEventListener('targetLost', () => {
               debugLog("Marker lost");
-              document.querySelector('#topVideoEntity').setAttribute('position', '0 0.8 0');
-              document.querySelector('#leftImageEntity').setAttribute('position', '-0.6 0.5 0');
-              document.querySelector('#rightImageEntity').setAttribute('position', '0.6 0.5 0');
-              document.querySelector('#mapPlane').setAttribute('position', '0 -1.2 0.04');
-              document.querySelector('#mapPlane').setAttribute('material', 'shader: standard; opacity: 0');
-              document.querySelector('#cardBox').setAttribute('rotation', '0 0 0');
-
+              
+              // Reset positions safely
+              const elements = {
+                '#topVideoEntity': '0 0.8 0',
+                '#leftImageEntity': '-0.6 0.5 0',
+                '#rightImageEntity': '0.6 0.5 0',
+                '#mapPlane': '0 -1.2 0.04',
+              };
+              
+              Object.entries(elements).forEach(([selector, position]) => {
+                const el = document.querySelector(selector);
+                if (el) el.setAttribute('position', position);
+              });
+              
+              const mapPlane = document.querySelector('#mapPlane');
+              if (mapPlane) mapPlane.setAttribute('material', 'shader: standard; opacity: 0');
+              
+              const cardBox = document.querySelector('#cardBox');
+              if (cardBox) cardBox.setAttribute('rotation', '0 0 0');
+              
               const video = document.querySelector('#topVideo');
               if (video) {
                 video.pause();
@@ -342,6 +389,18 @@
             });
           });
         }
+      }
+
+      // Initialize everything when window loads
+      window.addEventListener('load', () => {
+        debugLog("App loaded.");
+        simulateLoading();
+        setupVisitButton();
+        setupMobileInteractions();
+        loadMapWithGeolocation();
+        scaleForSmallScreens();
+        setupCardFlip();
+        setupScene();
       });
     </script>
   </a-scene>
