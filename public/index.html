@@ -31,13 +31,14 @@
            embedded color-space="sRGB"
            renderer="colorManagement: true, physicallyCorrectLights"
            device-orientation-permission-ui="enabled: true"
-           shadow="type: pcfsoft">
+           shadow="type: pcfsoft"
+           screenshot="">
     <a-entity light="type: directional; color: #ffffff; intensity: 0.8" position="-0.5 1 1"></a-entity>
     <a-entity light="type: ambient; color: #ffffff; intensity: 0.3"></a-entity>
 
     <a-assets>
       <canvas id="cardGradient" width="100" height="100"></canvas>
-      <video id="topVideo" src="./assets/images/promo.mp4" loop crossorigin="anonymous" muted playsinline></video>
+      <video id="topVideo" src="./assets/images/promo.mp4" loop crossorigin="anonymous" muted autoplay playsinline></video>
       <img id="leftImage" src="./assets/images/seagold.png" crossorigin="anonymous">
       <img id="rightImage" src="./assets/images/test.png" crossorigin="anonymous">
       <img id="cardFront" src="./assets/images/ARCARD.png" crossorigin="anonymous">
@@ -53,7 +54,9 @@
                material="side: front; metalness: 0.3; roughness: 0.7"
                animation__slideout="property: position; to: 1.2 0.2 0.01; dur: 1800; delay: 200; easing: easeOutBack; startEvents: startSlideOut"
                animation__visible="property: visible; to: true; startEvents: startSlideOut"
-               animation__rotate="property: rotation; to: 0 360 0; dur: 20000; loop: true; easing: linear">
+               animation__rotate="property: rotation; to: 0 360 0; dur: 20000; loop: true; easing: linear"
+               event-set__mouseenter="_event: mouseenter; scale: 1.05 1.05 1"
+               event-set__mouseleave="_event: mouseleave; scale: 1 1 1">
       </a-image>
 
       <!-- Left Image -->
@@ -63,7 +66,9 @@
                material="side: front; metalness: 0.3; roughness: 0.7"
                animation__slideout="property: position; to: -1.2 0.2 0.01; dur: 1800; delay: 800; easing: easeOutBack; startEvents: startSlideOut"
                animation__visible="property: visible; to: true; startEvents: startSlideOut"
-               animation__rotate="property: rotation; to: 0 360 0; dur: 20000; loop: true; easing: linear">
+               animation__rotate="property: rotation; to: 0 360 0; dur: 20000; loop: true; easing: linear"
+               event-set__mouseenter="_event: mouseenter; scale: 1.05 1.05 1"
+               event-set__mouseleave="_event: mouseleave; scale: 1 1 1">
       </a-image>
 
       <!-- Top Video -->
@@ -72,19 +77,37 @@
                material="side: double; shader: flat"
                animation__slideout="property: position; to: 0 1.2 0.01; dur: 2000; delay: 1400; easing: easeOutCubic; startEvents: startSlideOut"
                animation__visible="property: visible; to: true; startEvents: startSlideOut"
-               animation__float="property: rotation; to: 0 5 0; dir: alternate; dur: 4000; loop: true; easing: easeInOutSine">
+               animation__float="property: rotation; to: 0 5 0; dir: alternate; dur: 4000; loop: true; easing: easeInOutSine"
+               event-set__mouseenter="_event: mouseenter; scale: 1.05 1.05 1"
+               event-set__mouseleave="_event: mouseleave; scale: 1 1 1">
       </a-video>
 
       <!-- Centered Card -->
       <a-box id="cardBox" class="clickable glow-pulse" position="0 0.2 0" depth="0.03" height="0.7" width="1.1"
              material="src: #cardFront; side: front; metalness: 0.4; roughness: 0.6"
-             shadow="receive: true">
+             shadow="receive: true"
+             animation__entrance="property: scale; from: 0 0 0; to: 1 1 1; dur: 600; easing: easeOutBack; startEvents: startSlideOut"
+             animation__idle="property: rotation; to: 0 360 0; dur: 30000; loop: true; easing: linear">
         <a-material src="#cardBack" side="back"></a-material>
         <a-material color="#f2ede3" side="left"></a-material>
         <a-material color="#f2ede3" side="right"></a-material>
         <a-material color="#f2ede3" side="top"></a-material>
         <a-material color="#f2ede3" side="bottom"></a-material>
       </a-box>
+      <!-- Flip Hint -->
+      <a-text id="tapHint" value="Tap to Flip" position="0 1.2 0.05" visible="false"
+              color="#fff" align="center" width="1.5" opacity="0.8"
+              animation__fade="property: opacity; to: 0.3; dir: alternate; loop: true; dur: 1500">
+      </a-text>
+
+      <!-- Snapshot Button -->
+      <a-plane id="snapBtn" class="clickable" position="0 -0.8 0.02" width="0.3" height="0.12" color="#222"
+               material="shader: flat; opacity: 0.9"
+               event-set__mouseenter="_event: mouseenter; scale: 1.05 1.05 1"
+               event-set__mouseleave="_event: mouseleave; scale: 1 1 1">
+        <a-text value="📷 Save" align="center" width="1" color="#fff" position="0 0 0.01"></a-text>
+      </a-plane>
+
       <!-- Visit Button -->
       <a-plane id="visitPlane" class="clickable" position="0 -0.45 0.02"
                width="0.6" height="0.15" color="#00bf63"
@@ -117,13 +140,24 @@
 
     <div id="debug-console"></div>
     <script>
-      const canvas = document.getElementById('cardGradient');
-      const ctx = canvas.getContext('2d');
-      const gradient = ctx.createLinearGradient(0, 0, 100, 100);
-      gradient.addColorStop(0, '#f2ede3');
-      gradient.addColorStop(1, '#e8e0d0');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 100, 100);
+      function simulateLoading() {
+        const progressFill = document.getElementById('progress-fill');
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            setTimeout(() => {
+              document.getElementById('ar-loader').style.opacity = 0;
+              setTimeout(() => {
+                document.getElementById('ar-loader').style.display = 'none';
+              }, 500);
+            }, 300);
+          }
+          progressFill.style.width = `${progress}%`;
+        }, 300);
+      }
 
       const debugConsole = document.getElementById('debug-console');
       function debugLog(msg) {
@@ -143,7 +177,6 @@
         if (visitPlane) {
           visitPlane.addEventListener('mousedown', () => {
             debugLog("Visit button clicked. Redirecting to website...");
-
             fetch('https://seagold-dormitory.vercel.app/api/log-visit', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -153,13 +186,40 @@
                 source: 'seagold-ar-business-card'
               })
             }).catch(err => debugLog('Analytics log failed: ' + err.message));
-
             const link = document.createElement('a');
             link.href = 'https://seagold-dormitory.vercel.app';
             link.target = '_blank';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+          });
+        }
+      }
+
+      function setupEnhancedInteractivity() {
+        setTimeout(() => {
+          const hint = document.getElementById('tapHint');
+          if (hint) hint.setAttribute('visible', 'true');
+        }, 3500);
+
+        const card = document.getElementById('cardBox');
+        if (card) {
+          card.addEventListener('mousedown', () => {
+            const hint = document.getElementById('tapHint');
+            if (hint) hint.setAttribute('visible', 'false');
+          });
+        }
+
+        const snapBtn = document.getElementById('snapBtn');
+        if (snapBtn) {
+          snapBtn.addEventListener('click', () => {
+            const scene = document.querySelector('a-scene');
+            if (scene && scene.components.screenshot) {
+              scene.components.screenshot.capture('perspective');
+              debugLog("Snapshot taken.");
+            } else {
+              debugLog("Screenshot component missing.");
+            }
           });
         }
       }
@@ -219,47 +279,6 @@
         }, { once: true });
       }
 
-      const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
-      const dormPos = { lat: 14.603919, lng: 120.987760 };
-
-      function setMapTexture(url) {
-        const mapPlane = document.getElementById("mapPlane");
-        if (!mapPlane) return;
-        const secureUrl = url.startsWith('http:') ? url.replace('http:', 'https:') : url;
-        const img = new Image();
-        img.onload = () => {
-          mapPlane.setAttribute("material", `shader: standard; src: ${secureUrl}; opacity: 0; metalness: 0.2; roughness: 0.6`);
-          debugLog(`Map texture loaded`);
-        };
-        img.onerror = () => {
-          mapPlane.setAttribute("material", "shader: standard; color: #4a954e; opacity: 0");
-          debugLog("Map load failed.");
-        };
-        img.src = secureUrl;
-      }
-
-      function loadMapWithGeolocation() {
-        debugLog("Fetching map...");
-        const base = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=16&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            pos => {
-              const { latitude, longitude } = pos.coords;
-              const fullUrl = `${base}&markers=color:blue%7C${latitude},${longitude}`;
-              setMapTexture(fullUrl);
-            },
-            err => {
-              debugLog("Geo error: " + err.message);
-              setMapTexture(base);
-            },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-          );
-        } else {
-          debugLog("Geolocation unsupported.");
-          setMapTexture(base);
-        }
-      }
-
       function setupCardFlip() {
         const card = document.querySelector('#cardBox');
         if (!card) return;
@@ -278,33 +297,14 @@
         });
       }
 
-      function simulateLoading() {
-        const progressFill = document.getElementById('progress-fill');
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += Math.random() * 10;
-          if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-            setTimeout(() => {
-              document.getElementById('ar-loader').style.opacity = 0;
-              setTimeout(() => {
-                document.getElementById('ar-loader').style.display = 'none';
-              }, 500);
-            }, 300);
-          }
-          progressFill.style.width = `${progress}%`;
-        }, 300);
-      }
-
       window.addEventListener('load', () => {
         debugLog("App loaded.");
         simulateLoading();
         setupVisitButton();
         setupMobileInteractions();
-        loadMapWithGeolocation();
         scaleForSmallScreens();
         setupCardFlip();
+        setupEnhancedInteractivity();
 
         const scene = document.querySelector('a-scene');
         const anchor = document.getElementById('anchor');
@@ -320,6 +320,7 @@
               const leftEl = document.querySelector('#leftImageEntity');
               const videoEl = document.querySelector('#topVideoEntity');
               const mapEl = document.querySelector('#mapPlane');
+              const cardBox = document.querySelector('#cardBox');
 
               rightEl.emit('startSlideOut');
 
@@ -336,6 +337,8 @@
                     mapEl.emit('startMapAnim');
                     enforceVisibility();
                     handleVideoPlayback();
+
+                    if (cardBox) cardBox.emit('startSlideOut');
                   }, { once: true });
                 }, { once: true });
               }, { once: true });
@@ -370,6 +373,9 @@
                 card.setAttribute('rotation', '0 0 0');
                 card.removeAttribute('animation__flip');
               }
+
+              const hint = document.getElementById('tapHint');
+              if (hint) hint.setAttribute('visible', 'false');
 
               anchor.__fixing = false;
             });
