@@ -1,27 +1,30 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "index.html",
-        "use": "@vercel/static"
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "headers": {
+        "Content-Type": "application/octet-stream",
+        "Access-Control-Allow-Origin": "*"
       }
-    ],
-    "routes": [
-      {
-        "src": "/assets/(.*)",
-        "headers": {
-          "Content-Type": "application/octet-stream",
-          "Access-Control-Allow-Origin": "*"
-        }
-      },
-      {
-        "src": "/assets/images/(.*\\.mp4)",
-        "headers": {
-          "Content-Type": "video/mp4"
-        }
+    },
+    {
+      "src": "/assets/images/(.*\\.mp4)",
+      "headers": {
+        "Content-Type": "video/mp4",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "GET,OPTIONS"
       }
-    ],
-    "public": true,
-    "cleanUrls": true,
-    "trailingSlash": false
-  }
+    }
+  ],
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false
+}
