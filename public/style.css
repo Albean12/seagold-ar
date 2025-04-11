@@ -151,11 +151,6 @@ body > video.mindar-image-video {
   50% { transform: translateY(-3px); }
 }
 
-/* ============ SAFETY OVERRIDES ============ */
-.a-entity[visible="false"] {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
 
 /* ============ LOADING SCREEN ============ */
 #ar-loader {
