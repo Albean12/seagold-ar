@@ -112,15 +112,19 @@
 
     <!-- BACK SIDE AR (Map Panel) -->
     <a-entity id="anchorBack" mindar-image-target="targetIndex: 1">
-      <a-plane  id="mapPlane"
-                position="0 0.2 0.01"
-                width="1.1"
-                height="0.7"
-                geometry="primitive: box; width: 1.1; height: 0.7; depth: 0.03"
-                material="shader: standard; metalness: 0.3; roughness: 0.6; side: double"
-                shadow="receive: true"
-                visible="false">
-      </a-plane>
+      <a-box  id="mapPlane"
+              position="0 0.2 -0.1"
+              width="1.1"
+              height="0.7"
+              depth="0.03"
+              visible="false"
+              material="shader: standard; metalness: 0.3; roughness: 0.6; side: double"
+              shadow="receive: true"
+              animation__pop="property: position; from: 0 0.2 -0.1; to: 0 0.2 0.01; dur: 1200; easing: easeOutBack; startEvents: startMapAnim"
+              animation__scale="property: scale; from: 0.8 0.8 0.8; to: 1 1 1; dur: 1200; easing: easeOutCubic; startEvents: startMapAnim"
+              animation__visible="property: visible; to: true; startEvents: startMapAnim">
+      </a-box>
+
     </a-entity>
 
     <div id="debug-console"></div>
@@ -353,8 +357,7 @@
           anchorBack.addEventListener('targetFound', () => {
             debugLog("Back marker detected");
             const mapPlane = document.querySelector('#mapPlane');
-            mapPlane.setAttribute('visible', true);
-            mapPlane.setAttribute('opacity', 1);
+            mapPlane.emit('startMapAnim');
             loadMapWithGeolocation();
           });
 
