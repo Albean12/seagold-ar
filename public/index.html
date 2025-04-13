@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  <a-scene mindar-image="imageTargetSrc: ./assets/CARD-TEST.mind; autoStart: true; uiScanning: true; wasmPath: ./assets/mindar/; filterMinCF: 0.01; filterBeta: 0.001;"
+  <a-scene mindar-image="imageTargetSrc: ./assets/card.mind; autoStart: true; uiScanning: true; wasmPath: ./assets/mindar/; filterMinCF: 0.01; filterBeta: 0.001;"
            cursor="rayOrigin: mouse"
            embedded color-space="sRGB"
            renderer="colorManagement: true, physicallyCorrectLights"
@@ -41,13 +41,16 @@
     <!-- Assets -->
     <a-assets>
       <canvas id="cardGradient" width="100" height="100"></canvas>
-      <video id="topVideo" src="./assets/images/promo.mp4" loop crossorigin="anonymous" muted autoplay playsinline></video>
-      <img id="leftImage" src="./assets/images/seagold.png" crossorigin="anonymous">
+      <video id="topVideo" src="./assets/images/ROOMS.mp4" loop crossorigin="anonymous" muted autoplay playsinline></video>
+      <video id="leftVideo" src="./assets/images/FACILITY.mp4" loop crossorigin="anonymous" muted autoplay playsinline></video>
       <img id="cardFront" src="./assets/images/ARCARD.png" crossorigin="anonymous">
       <img id="cardBack" src="./assets/images/targets-target.png" crossorigin="anonymous">
     </a-assets>
+    
     <!-- Camera -->
-    <a-camera position="0 0 0" raycaster="objects: .clickable" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
+    <a-camera position="0 0 0" 
+              raycaster="objects: .clickable, #visitPlane; far: 100;"
+              cursor="fuse: false; rayOrigin: mouse;"></a-camera>
 
     <!-- FRONT SIDE AR -->
     <a-entity id="anchorFront" mindar-image-target="targetIndex: 0">
@@ -62,10 +65,10 @@
                 event-set__mouseleave="_event: mouseleave; scale: 1 1 1">
       </a-entity>
 
-      <!-- Left Image -->
-      <a-entity id="leftImageEntity" class="clickable glow-pulse"
+      <!-- Left Video -->
+      <a-entity id="leftVideoEntity" class="clickable glow-pulse"
                 geometry="primitive: box; width: 0.6; height: 0.4; depth: 0.03"
-                material="src: #leftImage; side: double; metalness: 0.3; roughness: 0.7"
+                material="shader: flat; src: #leftVideo; side: double"
                 position="0 0.2 -0.1" visible="false"
                 animation__slideout="property: position; to: -1.2 0.2 0.01; dur: 2500; delay: 800; easing: easeOutCubic; startEvents: startSlideOut"
                 animation__visible="property: visible; to: true; startEvents: startSlideOut"
@@ -85,22 +88,8 @@
         <a-material color="#f2ede3" side="bottom"></a-material>
       </a-box>
 
-      <!-- Hint -->
-      <a-text id="tapHint" value="Tap to Flip" position="0 1.2 0.05" visible="false"
-              color="#fff" align="center" width="1.5" opacity="0.8"
-              animation__fade="property: opacity; to: 0.3; dir: alternate; loop: true; dur: 1500">
-      </a-text>
-
-      <!-- Snapshot -->
-      <a-plane id="snapBtn" class="clickable" position="0 -0.8 0.02" width="0.3" height="0.12" color="#222"
-               material="shader: flat; opacity: 0.9"
-               event-set__mouseenter="_event: mouseenter; scale: 1.05 1.05 1"
-               event-set__mouseleave="_event: mouseleave; scale: 1 1 1">
-        <a-text value="📷 Save" align="center" width="1" color="#fff" position="0 0 0.01"></a-text>
-      </a-plane>
-
       <!-- Website Button -->
-      <a-plane id="visitPlane" class="clickable" position="0 -0.45 0.02"
+      <a-plane id="visitPlane" class="clickable" position="0 -0.45 0.05"
                width="0.6" height="0.15" color="#00bf63"
                material="shader: flat; transparent: false; opacity: 0.95"
                animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
@@ -124,7 +113,6 @@
               animation__scale="property: scale; from: 0.8 0.8 0.8; to: 1 1 1; dur: 1200; easing: easeOutCubic; startEvents: startMapAnim"
               animation__visible="property: visible; to: true; startEvents: startMapAnim">
       </a-box>
-
     </a-entity>
 
     <div id="debug-console"></div>
@@ -212,55 +200,37 @@
         console.log(msg);
       }
     
-      function setupVisitButton() {
+      function setupWebsiteButton() {
         const visitPlane = document.getElementById('visitPlane');
         if (visitPlane) {
-          visitPlane.addEventListener('mousedown', () => {
-            debugLog("Visit button clicked. Redirecting to website...");
-            fetch('https://seagold-dormitory.vercel.app/api/log-visit', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                timestamp: new Date().toISOString(),
-                action: 'visit-button-clicked',
-                source: 'seagold-ar-business-card'
-              })
-            }).catch(err => debugLog('Analytics log failed: ' + err.message));
-            const link = document.createElement('a');
-            link.href = 'https://seagold-dormitory.vercel.app';
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          });
+          const handleClick = () => {
+            debugLog("Website button clicked");
+            window.open('https://seagold-dormitory.vercel.app', '_blank');
+          };
+          
+          visitPlane.addEventListener('click', handleClick);
+          visitPlane.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleClick();
+          }, { passive: false });
         }
       }
     
-      function setupMobileInteractions() {
-        const clickables = document.querySelectorAll('.clickable');
-        clickables.forEach(el => {
-          el.addEventListener('touchstart', function (e) {
-            e.preventDefault();
-            this.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-          }, { passive: false });
-        });
-        debugLog("Touch compatibility initialized.");
-      }
-    
       function handleVideoPlayback() {
-        const video = document.querySelector('#topVideo');
-        if (!video) return;
-        const tryPlay = () => {
-          if (video.paused && video.readyState >= 3) {
-            video.play().then(() => {
-              debugLog("Video playing");
-            }).catch(e => {
-              debugLog("Video play error: " + e.message);
-              setTimeout(tryPlay, 1000);
-            });
-          }
-        };
-        tryPlay();
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+          const tryPlay = () => {
+            if (video.paused && video.readyState >= 3) {
+              video.play().then(() => {
+                debugLog(`Video ${video.id} playing`);
+              }).catch(e => {
+                debugLog(`Video ${video.id} play error: ${e.message}`);
+                setTimeout(tryPlay, 1000);
+              });
+            }
+          };
+          tryPlay();
+        });
       }
     
       function setupCardFlip() {
@@ -284,8 +254,7 @@
       window.addEventListener('load', () => {
         debugLog("App loaded.");
         simulateLoading();
-        setupVisitButton();
-        setupMobileInteractions();
+        setupWebsiteButton();
         setupCardFlip();
     
         const scene = document.querySelector('a-scene');
@@ -295,88 +264,78 @@
         if (scene) {
           scene.addEventListener('arReady', () => {
             debugLog("AR system ready");
-        // FRONT MARKER
-        if (anchorFront) {
-          anchorFront.addEventListener('targetFound', () => {
-            debugLog("Front marker detected. Launching smooth sequence...");
+            
+            // FRONT MARKER
+            if (anchorFront) {
+              anchorFront.addEventListener('targetFound', () => {
+                debugLog("Front marker detected. Launching smooth sequence...");
 
-            const videoEl = document.querySelector('#topVideoEntity');
-            const leftEl = document.querySelector('#leftImageEntity');
-            const cardBox = document.querySelector('#cardBox');
-            const hint = document.querySelector('#tapHint');
+                const videoEl = document.querySelector('#topVideoEntity');
+                const leftEl = document.querySelector('#leftVideoEntity');
+                const cardBox = document.querySelector('#cardBox');
 
-            videoEl.emit('startSlideOut');
+                videoEl.emit('startSlideOut');
 
-            videoEl.addEventListener('animationcomplete__slideout', () => {
-              debugLog("Video slide complete");
-              handleVideoPlayback();
-              leftEl.emit('startSlideOut');
+                videoEl.addEventListener('animationcomplete__slideout', () => {
+                  debugLog("Video slide complete");
+                  handleVideoPlayback();
+                  leftEl.emit('startSlideOut');
 
-              leftEl.addEventListener('animationcomplete__slideout', () => {
-                debugLog("Left image slide complete");
-                cardBox.emit('startSlideOut');
+                  leftEl.addEventListener('animationcomplete__slideout', () => {
+                    debugLog("Left video slide complete");
+                    cardBox.emit('startSlideOut');
+                  }, { once: true });
 
-                cardBox.addEventListener('animationcomplete__entrance', () => {
-                  if (hint) hint.setAttribute('visible', 'true');
                 }, { once: true });
+              });
 
-              }, { once: true });
+              anchorFront.addEventListener('targetLost', () => {
+                debugLog("Front marker lost. Resetting AR elements...");
+                ['#leftVideoEntity', '#topVideoEntity'].forEach(id => {
+                  const el = document.querySelector(id);
+                  if (el) {
+                    el.setAttribute('visible', 'false');
+                    el.setAttribute('position', '0 0.2 -0.1');
+                  }
+                });
 
-            }, { once: true });
-          });
+                const videos = document.querySelectorAll('video');
+                videos.forEach(video => {
+                  video.pause();
+                  video.currentTime = 0;
+                });
 
-          anchorFront.addEventListener('targetLost', () => {
-            debugLog("Front marker lost. Resetting AR elements...");
-            ['#leftImageEntity', '#topVideoEntity'].forEach(id => {
-              const el = document.querySelector(id);
-              if (el) {
-                el.setAttribute('visible', 'false');
-                el.setAttribute('position', '0 0.2 -0.1');
-              }
-            });
-
-            const video = document.querySelector('#topVideo');
-            if (video) {
-              video.pause();
-              video.currentTime = 0;
+                const card = document.querySelector('#cardBox');
+                if (card) {
+                  card.setAttribute('rotation', '0 0 0');
+                  card.removeAttribute('animation__flip');
+                }
+              });
             }
 
-            const card = document.querySelector('#cardBox');
-            if (card) {
-              card.setAttribute('rotation', '0 0 0');
-              card.removeAttribute('animation__flip');
-            }
+            // BACK MARKER — MAP SYSTEM
+            if (anchorBack) {
+              anchorBack.addEventListener('targetFound', () => {
+                debugLog("Back marker detected");
+                const mapPlane = document.querySelector('#mapPlane');
+                mapPlane.emit('startMapAnim');
+                loadMapWithGeolocation();
+              });
 
-            const hint = document.getElementById('tapHint');
-            if (hint) hint.setAttribute('visible', 'false');
-          });
-        }
-
-        // BACK MARKER — MAP SYSTEM
-        if (anchorBack) {
-          anchorBack.addEventListener('targetFound', () => {
-            debugLog("Back marker detected");
-            const mapPlane = document.querySelector('#mapPlane');
-            mapPlane.emit('startMapAnim');
-            loadMapWithGeolocation();
-          });
-
-          anchorBack.addEventListener('targetLost', () => {
-            debugLog("Back marker lost");
-            const mapEl = document.querySelector('#mapPlane');
-            if (mapEl) {
-              mapEl.setAttribute('visible', false);
-              mapEl.setAttribute('position', '0 0.2 0.01');
-              mapEl.setAttribute('material', 'shader: flat; color: #4a954e');
+              anchorBack.addEventListener('targetLost', () => {
+                debugLog("Back marker lost");
+                const mapEl = document.querySelector('#mapPlane');
+                if (mapEl) {
+                  mapEl.setAttribute('visible', false);
+                  mapEl.setAttribute('position', '0 0.2 0.01');
+                  mapEl.setAttribute('material', 'shader: flat; color: #4a954e');
+                }
+              });
             }
           });
         }
       });
-    }
-  });
-</script>
-
-</a-scene>
+    </script>
+  </a-scene>
 </body>
 </html>
-    

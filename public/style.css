@@ -19,6 +19,7 @@ body {
   width: 100vw;
   height: 100vh;
   font-family: 'Poppins', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ============ VIDEO FEED LAYER ============ */
@@ -77,8 +78,9 @@ body > video.mindar-image-video {
 .clickable {
   cursor: pointer;
   transition: all 0.3s ease;
-  pointer-events: auto;
+  pointer-events: auto !important;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .clickable:hover {
@@ -86,15 +88,29 @@ body > video.mindar-image-video {
   transform: scale(1.05);
 }
 
-/* Visit button animation */
+/* Visit button enhancements */
 #visitPlane {
   animation: glowPulse 1.8s ease-in-out infinite alternate;
   transition: transform 0.3s ease, filter 0.3s ease;
+  pointer-events: auto !important;
+  z-index: 10;
+  position: relative;
+  will-change: transform;
 }
 
 #visitPlane:hover {
   filter: brightness(1.1) saturate(1.1);
   transform: scale(1.04);
+}
+
+#visitPlane:active {
+  transform: scale(0.98) !important;
+  animation: none !important;
+  filter: brightness(0.9) !important;
+}
+
+#visitPlane a-text {
+  pointer-events: none !important;
 }
 
 @keyframes glowPulse {
@@ -150,7 +166,6 @@ body > video.mindar-image-video {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
 }
-
 
 /* ============ LOADING SCREEN ============ */
 #ar-loader {
@@ -258,6 +273,7 @@ body > video.mindar-image-video {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 /* ============ RESPONSIVE MOBILE TWEAKS ============ */
 @media screen and (max-width: 768px) {
   a-scene {
@@ -266,8 +282,8 @@ body > video.mindar-image-video {
   }
 
   #visitPlane {
-    width: 0.5 !important;
-    height: 0.12 !important;
+    width: 0.8 !important;
+    height: 0.2 !important;
   }
 
   #mapPlane {
@@ -291,7 +307,19 @@ body > video.mindar-image-video {
   #debug-console {
     font-size: 12px;
   }
+
+  /* Mobile touch area expansion */
+  #visitPlane::after {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    z-index: -1;
+  }
 }
+
 /* ============ ENTITY GLOW ANIMATIONS ============ */
 .glow-pulse {
   animation: elementGlow 2.5s ease-in-out infinite alternate;
@@ -307,4 +335,24 @@ body > video.mindar-image-video {
     filter: drop-shadow(0 0 12px rgba(255,255,255,0.75));
     transform: scale(1.02);
   }
+}
+
+/* ============ CLICK FIX ENHANCEMENTS ============ */
+a-cursor {
+  pointer-events: none !important;
+}
+
+[a-mouse-cursor] {
+  pointer-events: none !important;
+}
+
+#visitPlane a-text {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Force hardware acceleration */
+#visitPlane, #visitPlane > * {
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
 }
