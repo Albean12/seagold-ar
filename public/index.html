@@ -89,13 +89,20 @@
       </a-box>
 
       <!-- Website Button -->
-      <a-plane id="visitPlane" class="clickable" position="0 -0.45 0.05"
-               width="0.6" height="0.15" color="#00bf63"
-               material="shader: flat; transparent: false; opacity: 0.95"
-               animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
-        <a-text class="clickable" value="VISIT OUR WEBSITE" align="center" width="0.8" color="#ffffff"
-                font-family="Poppins" font-weight="600" position="0 0 0.02">
-        </a-text>
+          <a-plane id="visitPlane" class="clickable"
+                  position="0 -0.45 0.15"
+                  width="0.6" height="0.15" color="#00bf63"
+                  material="shader: flat; transparent: false; opacity: 0.95; side: double"
+                  animation="property: scale; to: 1.05 1.05 1; dir: alternate; loop: true; dur: 1200">
+            <a-text value="VISIT OUR WEBSITE"
+                    align="center"
+                    width="0.8"
+                    color="#ffffff"
+                    font-family="Poppins"
+                    font-weight="600"
+                    position="0 0 0.02"
+                    pointer-events="none">
+            </a-text>
       </a-plane>
     </a-entity>
 
@@ -203,14 +210,19 @@
       function setupWebsiteButton() {
         const visitPlane = document.getElementById('visitPlane');
         if (visitPlane) {
+           // ✅ Confirm if raycaster detects this element
+          visitPlane.addEventListener('raycaster-intersected', () => {
+            debugLog("✅ visitPlane intersected by raycaster");
+          });
           const handleClick = () => {
-            debugLog("Website button clicked");
-            window.open('https://seagold-dormitory.vercel.app', '_blank');
-          };
-          
+              debugLog("🔥 Website button clicked!");
+              alert("Redirecting to Seagold Website...");
+              window.open('https://seagold-dormitory.vercel.app', '_blank');
+            };    
           visitPlane.addEventListener('click', handleClick);
+          visitPlane.addEventListener('mousedown', handleClick);
           visitPlane.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+                  e.preventDefault();
             handleClick();
           }, { passive: false });
         }
