@@ -83,9 +83,9 @@
         <a-material color="#f2ede3" side="bottom"></a-material>
       </a-box>
 
-      <!-- Website Button (Visible) -->
+      <!-- Website Button (Visual Only) -->
       <a-plane id="visitPlane" position="0 -0.45 0.15"
-               width="0.6" height="0.15" color="#00bf63"
+               width="0.6" height="0.15" color=\"#00bf63\"
                material="shader: flat; transparent: false; opacity: 0.95; side: double">
         <a-text value="VISIT OUR WEBSITE"
                 align="center"
@@ -97,14 +97,6 @@
                 pointer-events="none">
         </a-text>
       </a-plane>
-
-      <!-- ✅ Invisible Hitbox -->
-      <a-box id="visitHitbox" class="clickable"
-             width="0.6" height="0.15" depth="0.02"
-             position="0 -0.45 0.16"
-             opacity="0.0"
-             material="shader: flat; color: #000; transparent: true">
-      </a-box>
     </a-entity>
     <!-- BACK SIDE AR (Map Panel) -->
     <a-entity id="anchorBack" mindar-image-target="targetIndex: 1">
@@ -126,9 +118,6 @@
       const debugConsole = document.getElementById('debug-console');
       function debugLog(msg) {
         if (!debugConsole) return;
-        if (debugConsole.children.length > 50) {
-          debugConsole.removeChild(debugConsole.firstChild);
-        }
         const entry = document.createElement('div');
         entry.textContent = `[DEBUG ${new Date().toLocaleTimeString()}]: ${msg}`;
         debugConsole.appendChild(entry);
@@ -155,123 +144,76 @@
         }, 300);
       }
 
-      function setupWebsiteButton() {
-        const visitPlane = document.getElementById('visitPlane');
-        if (visitPlane) {
-          visitPlane.addEventListener('raycaster-intersected', () => {
-            debugLog("✅ visitPlane intersected");
-          });
-        }
-
-        const hitbox = document.getElementById('visitHitbox');
-        if (hitbox) {
-          hitbox.addEventListener('raycaster-intersected', () => {
-            debugLog("✅ visitHitbox intersected");
-          });
-
-          const handleClick = () => {
-            debugLog("🔥 visitHitbox clicked!");
-            alert("Redirecting to Seagold Website...");
-            window.open('https://seagold-dormitory.vercel.app', '_blank');
-          };
-
-          hitbox.addEventListener('click', handleClick);
-          hitbox.addEventListener('mousedown', handleClick);
-          hitbox.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleClick();
-          }, { passive: false });
-        }
-      }
-      const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
-      const dormPos = { lat: 14.603919, lng: 120.987760 };
-
       function setMapTexture(url) {
         const mapPlane = document.getElementById("mapPlane");
-        if (!mapPlane) return;
-
         const secureUrl = url.startsWith('http:') ? url.replace('http:', 'https:') : url;
         const img = new Image();
-
         img.onload = () => {
           mapPlane.setAttribute("material", `shader: flat; src: ${secureUrl}`);
           mapPlane.setAttribute("visible", true);
-          mapPlane.setAttribute("opacity", 1);
-          debugLog(`Map texture loaded`);
         };
-
         img.onerror = () => {
           mapPlane.setAttribute("material", "shader: flat; color: #4a954e");
           mapPlane.setAttribute("visible", true);
-          mapPlane.setAttribute("opacity", 1);
-          debugLog("Map load failed.");
         };
-
         img.src = secureUrl;
       }
 
       function loadMapWithGeolocation() {
-        debugLog("Fetching map...");
+        const GOOGLE_API_KEY = "AIzaSyBoAmNMyi-pULIdPSAjDMbRsrHMWeXLLrE";
+        const dormPos = { lat: 14.603919, lng: 120.987760 };
         const base = `https://maps.googleapis.com/maps/api/staticmap?center=${dormPos.lat},${dormPos.lng}&zoom=16&size=400x300&markers=color:red%7C${dormPos.lat},${dormPos.lng}&key=${GOOGLE_API_KEY}`;
 
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             pos => {
-              const { latitude, longitude } = pos.coords;
-              const fullUrl = `${base}&markers=color:blue%7C${latitude},${longitude}`;
+              const fullUrl = `${base}&markers=color:blue%7C${pos.coords.latitude},${pos.coords.longitude}`;
               setMapTexture(fullUrl);
             },
-            err => {
-              debugLog("Geo error: " + err.message);
-              setMapTexture(base);
-            },
+            () => setMapTexture(base),
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
           );
         } else {
-          debugLog("Geolocation unsupported.");
           setMapTexture(base);
         }
       }
 
       function setupCardFlip() {
         const card = document.querySelector('#cardBox');
-        if (!card) return;
         let isFlipped = false;
         card.addEventListener('mousedown', () => {
           isFlipped = !isFlipped;
-          const newRotation = isFlipped ? '0 180 0' : '0 0 0';
           card.setAttribute('animation__flip', {
             property: 'rotation',
-            to: newRotation,
+            to: isFlipped ? '0 180 0' : '0 0 0',
             dur: 1000,
-            easing: 'easeOutElastic',
-            elasticity: 400
+            easing: 'easeOutElastic'
           });
-          debugLog("Card flipped to: " + newRotation);
         });
       }
 
       function handleVideoPlayback() {
-        const videos = document.querySelectorAll('video');
-        videos.forEach(video => {
+        document.querySelectorAll('video').forEach(video => {
           const tryPlay = () => {
             if (video.paused && video.readyState >= 3) {
-              video.play().then(() => {
-                debugLog(`Video ${video.id} playing`);
-              }).catch(e => {
-                debugLog(`Video ${video.id} play error: ${e.message}`);
-                setTimeout(tryPlay, 1000);
-              });
+              video.play().catch(() => setTimeout(tryPlay, 1000));
             }
           };
           tryPlay();
         });
       }
 
+      function enableTapRedirect() {
+        debugLog("📲 Enabling AR scene tap redirect");
+        const openSite = () => {
+          debugLog("🌐 Opening website from AR tap");
+          window.open('https://seagold-dormitory.vercel.app', '_blank');
+        };
+        document.body.addEventListener('click', openSite, { once: true });
+      }
+
       window.addEventListener('load', () => {
-        debugLog("App loaded.");
         simulateLoading();
-        setupWebsiteButton();
         setupCardFlip();
 
         const scene = document.querySelector('a-scene');
@@ -280,33 +222,28 @@
 
         if (scene) {
           scene.addEventListener('arReady', () => {
-            debugLog("AR system ready");
+            debugLog("✅ AR system ready");
 
             if (anchorFront) {
               anchorFront.addEventListener('targetFound', () => {
-                debugLog("Front marker detected. Launching smooth sequence...");
+                debugLog("🎯 Front marker detected");
+                enableTapRedirect();
 
                 const videoEl = document.querySelector('#topVideoEntity');
                 const leftEl = document.querySelector('#leftVideoEntity');
                 const cardBox = document.querySelector('#cardBox');
 
                 videoEl.emit('startSlideOut');
-
                 videoEl.addEventListener('animationcomplete__slideout', () => {
-                  debugLog("Video slide complete");
                   handleVideoPlayback();
                   leftEl.emit('startSlideOut');
-
                   leftEl.addEventListener('animationcomplete__slideout', () => {
-                    debugLog("Left video slide complete");
                     cardBox.emit('startSlideOut');
                   }, { once: true });
-
                 }, { once: true });
               });
 
               anchorFront.addEventListener('targetLost', () => {
-                debugLog("Front marker lost. Resetting AR elements...");
                 ['#leftVideoEntity', '#topVideoEntity'].forEach(id => {
                   const el = document.querySelector(id);
                   if (el) {
@@ -315,8 +252,7 @@
                   }
                 });
 
-                const videos = document.querySelectorAll('video');
-                videos.forEach(video => {
+                document.querySelectorAll('video').forEach(video => {
                   video.pause();
                   video.currentTime = 0;
                 });
@@ -331,14 +267,11 @@
 
             if (anchorBack) {
               anchorBack.addEventListener('targetFound', () => {
-                debugLog("Back marker detected");
-                const mapPlane = document.querySelector('#mapPlane');
-                mapPlane.emit('startMapAnim');
+                document.querySelector('#mapPlane').emit('startMapAnim');
                 loadMapWithGeolocation();
               });
 
               anchorBack.addEventListener('targetLost', () => {
-                debugLog("Back marker lost");
                 const mapEl = document.querySelector('#mapPlane');
                 if (mapEl) {
                   mapEl.setAttribute('visible', false);
